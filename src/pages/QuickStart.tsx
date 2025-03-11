@@ -52,7 +52,7 @@ export function QuickStart() {
           {/* Ajout d'un bouton Générer un Projet */}
           <button
               onClick={handleGenerateSpringProject}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">
+              className="flex-1 bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 flex items-center justify-center gap-2">
             Générer un projet Spring
           </button>
         </div>

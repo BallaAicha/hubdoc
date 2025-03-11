@@ -42,7 +42,7 @@ export function GenerateSpringProject() {
 
     return (
         <div className="container mx-auto py-6">
-            <h1 className="text-2xl font-bold mb-6">Générateur de projet Spring</h1>
+            <h1 className="text-2xl font-bold mb-6">Générateur de projet Spring Respectant les Normes de DEV</h1>
 
             <form className="bg-white p-6 rounded-lg shadow-md" onSubmit={handleSubmit}>
                 <div className="mb-4">
@@ -100,7 +100,7 @@ export function GenerateSpringProject() {
 
                 <button
                     type="submit"
-                    className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+                    className="flex-1 bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 flex items-center justify-center gap-2"
                 >
                     Générer le projet
                 </button>
