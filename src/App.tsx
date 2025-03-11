@@ -4,6 +4,7 @@ import { Navbar } from './components/Navbar';
 import { Home } from './pages/Home';
 import { Documents } from './pages/Documents';
 import { QuickStart } from './pages/QuickStart';
+import {GenerateSpringProject} from "./pages/GenerateSpringProject.tsx";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route path="/documents" element={<Documents />} />
           <Route path="/quickstart" element={<QuickStart />} />
           <Route path="/settings" element={<div className="p-4">Settings page coming soon</div>} />
+          <Route path="/generate-spring-project" element={<GenerateSpringProject />} />
         </Routes>
       </div>
     </Router>
