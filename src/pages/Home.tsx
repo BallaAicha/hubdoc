@@ -5,21 +5,21 @@ import { RecentPresentation } from '../types';
 const recentPresentations: RecentPresentation[] = [
   {
     id: '1',
-    title: 'Présentation technique App Mobile et API Business',
+    title: 'Formation sur les Normes de Dev',
     date: '15 mars 2024',
     duration: '1h30',
     status: 'En cours',
   },
   {
     id: '2',
-    title: 'Demande de Paiement (Request to Pay) - MX2 de documentation technique',
+    title: 'Présentation des cas d\'usages de de Platform',
     date: '14 mars 2024',
     duration: '2h00',
     status: 'Terminé',
   },
   {
     id: '3',
-    title: 'Guide de déploiement de l\'API et Sandbox',
+    title: 'Réunion Tech Lead Pour les Sujets de Stage PFE ',
     date: '13 mars 2024',
     duration: '1h30',
     status: 'Terminé',
@@ -78,11 +78,11 @@ export function Home() {
               <h2 className="text-2xl font-bold text-gray-700 mb-4">Documents</h2>
               <div className="space-y-3">
                 {[
-                  "Spécifications générales des messages dans PI",
-                  "Répertoire des BICs (PI BAC)",
-                  "Cas d'usage / Scénarios de transfert",
-                  "Spécifications fonctionnelles de l'AIP",
-                  "Exigences minimales de l'interface utilisateur",
+                  "Normes de développement",
+                  "Guide d'intégration",
+                  "Nos APIs",
+                  "Normes de sécurité",
+                  "Architecture hexagonale",
                 ].map((doc, index) => (
                     <div key={index} className="flex items-center justify-between hover:bg-gray-50 rounded-lg px-4 py-2 transition">
                       <span className="text-gray-700">{doc}</span>
