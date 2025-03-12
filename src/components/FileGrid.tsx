@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FileItem } from '../types';
 import { File, Folder, User } from 'lucide-react';
 import { FileDialog } from './FileDialog';
+import { useNavigate } from 'react-router-dom';
 
 interface FileGridProps {
     files: FileItem[];
@@ -9,6 +10,7 @@ interface FileGridProps {
 
 export function FileGrid({ files }: FileGridProps) {
     const [selectedFile, setSelectedFile] = useState<FileItem | null>(null);
+    const navigate = useNavigate();
 
     return (
         <>
@@ -17,7 +19,15 @@ export function FileGrid({ files }: FileGridProps) {
                     <div
                         key={file.id}
                         className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 border border-gray-200 cursor-pointer"
-                        onClick={() => file.type === 'pdf' && setSelectedFile(file)}
+                        onClick={() => {
+                            if (file.type === 'folder') {
+                                // Navigation lorsque l'utilisateur clique sur un dossier.
+                                navigate(`/documents/${file.id}`);
+                            } else if (file.type === 'pdf') {
+                                // Ouvrir la boîte de dialogue pour les fichiers PDF.
+                                setSelectedFile(file);
+                            }
+                        }}
                     >
                         <div className="mb-4">
                             {file.type === 'folder' ? (

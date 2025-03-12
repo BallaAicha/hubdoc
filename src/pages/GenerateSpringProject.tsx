@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ChevronDown } from 'lucide-react'; // Pour une icône moderne de menu déroulant
 
 export function GenerateSpringProject() {
     const [projectName, setProjectName] = useState('');
@@ -41,70 +42,113 @@ export function GenerateSpringProject() {
     };
 
     return (
-        <div className="container mx-auto py-6">
-            <h1 className="text-2xl font-bold mb-6">Générateur de projet Spring Respectant les Normes de DEV</h1>
+        <div className="min-h-screen bg-gradient-to-br from-[#e9041e] via-white to-gray-100 py-12 px-6">
+            <div className="max-w-3xl mx-auto bg-white shadow-2xl rounded-xl overflow-hidden">
+                {/* En-tête */}
+                <header className="bg-[#e9041e] text-white px-6 py-6 text-center">
+                    <h1 className="text-3xl font-extrabold tracking-wide">
+                        Générateur de projet Spring
+                    </h1>
+                    <p className="mt-2 text-sm">
+                        Créez facilement un projet Spring conforme aux normes de DEV.
+                    </p>
+                </header>
 
-            <form className="bg-white p-6 rounded-lg shadow-md" onSubmit={handleSubmit}>
-                <div className="mb-4">
-                    <label className="block mb-2 font-semibold">Nom du projet</label>
-                    <input
-                        type="text"
-                        className="w-full border border-gray-300 rounded px-4 py-2"
-                        value={projectName}
-                        onChange={(e) => setProjectName(e.target.value)}
-                        placeholder="Entrez le nom du projet"
-                        required
-                    />
-                </div>
-
-                <div className="mb-4">
-                    <label className="block mb-2 font-semibold">Version de Java</label>
-                    <select
-                        className="w-full border border-gray-300 rounded px-4 py-2"
-                        value={javaVersion}
-                        onChange={(e) => setJavaVersion(e.target.value)}
-                    >
-                        <option value="8">Java 8</option>
-                        <option value="11">Java 11</option>
-                        <option value="17">Java 17 (recommandé)</option>
-                        <option value="20">Java 20</option>
-                    </select>
-                </div>
-
-                <div className="mb-4">
-                    <label className="block mb-2 font-semibold">Outil de build</label>
-                    <select
-                        className="w-full border border-gray-300 rounded px-4 py-2"
-                        value={buildTool}
-                        onChange={(e) => setBuildTool(e.target.value)}
-                    >
-                        <option value="Maven">Maven</option>
-                        <option value="Gradle">Gradle</option>
-                    </select>
-                </div>
-
-                <div className="mb-4">
-                    <label className="block mb-2 font-semibold">Dépendances</label>
-                    {predefinedDependencies.map((dep) => (
-                        <label key={dep} className="flex items-center mb-2">
-                            <input
-                                type="checkbox"
-                                className="mr-2"
-                                checked={dependencies.includes(dep)}
-                                onChange={() => handleDependencyChange(dep)}
-                            />
-                            {dep}
+                {/* Formulaire */}
+                <form className="px-8 py-10 space-y-8" onSubmit={handleSubmit}>
+                    {/* Nom du projet */}
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-600">
+                            Nom du projet <span className="text-red-500">*</span>
                         </label>
-                    ))}
-                </div>
+                        <input
+                            type="text"
+                            value={projectName}
+                            onChange={(e) => setProjectName(e.target.value)}
+                            placeholder="Entrez le nom du projet"
+                            className="mt-2 w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#e9041e] focus:ring-2 focus:ring-[#e9041e] text-gray-700"
+                            required
+                        />
+                    </div>
 
-                <button
-                    type="submit"
-                    className="flex-1 bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 flex items-center justify-center gap-2"
-                >
-                    Générer le projet
-                </button>
-            </form>
+                    {/* Version de Java */}
+                    <div className="relative">
+                        <label className="block text-sm font-semibold text-gray-600">
+                            Version de Java
+                        </label>
+                        <div className="mt-2 relative">
+                            <select
+                                value={javaVersion}
+                                onChange={(e) => setJavaVersion(e.target.value)}
+                                className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#e9041e] focus:ring-2 focus:ring-[#e9041e] text-gray-700 bg-white"
+                            >
+                                <option value="8">Java 8</option>
+                                <option value="11">Java 11</option>
+                                <option value="17">Java 17 (recommandé)</option>
+                                <option value="20">Java 20</option>
+                            </select>
+                            <ChevronDown className="absolute top-1/2 transform -translate-y-1/2 right-4 text-gray-400 w-5 h-5 pointer-events-none" />
+                        </div>
+                    </div>
+
+                    {/* Outil de build */}
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-600">
+                            Outil de build
+                        </label>
+                        <div className="mt-2 relative">
+                            <select
+                                value={buildTool}
+                                onChange={(e) => setBuildTool(e.target.value)}
+                                className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#e9041e] focus:ring-2 focus:ring-[#e9041e] text-gray-700 bg-white"
+                            >
+                                <option value="Maven">Maven</option>
+                                <option value="Gradle">Gradle</option>
+                            </select>
+                            <ChevronDown className="absolute top-1/2 transform -translate-y-1/2 right-4 text-gray-400 w-5 h-5 pointer-events-none" />
+                        </div>
+                    </div>
+
+                    {/* Dépendances */}
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-600">
+                            Dépendances
+                        </label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                            {predefinedDependencies.map((dep) => (
+                                <div
+                                    key={dep}
+                                    className="flex items-center bg-gray-100 rounded-lg px-4 py-3 cursor-pointer transition hover:bg-[#efccd2]"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        className="mr-3 accent-[#e9041e] w-5 h-5"
+                                        checked={dependencies.includes(dep)}
+                                        onChange={() => handleDependencyChange(dep)}
+                                    />
+                                    <label className="text-gray-700 text-sm">{dep}</label>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Bouton de soumission */}
+                    <div>
+                        <button
+                            type="submit"
+                            className="w-full py-3 rounded-lg bg-[#e9041e] text-white font-semibold hover:bg-red-600 transition focus:outline-none focus:ring-2 focus:ring-red-500 flex items-center justify-center gap-3"
+                        >
+                            Générer le projet
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <footer className="mt-6 text-center">
+                <p className="text-sm text-gray-500">
+                    © 2024 Générateur Spring. Tous droits réservés.
+                </p>
+            </footer>
         </div>
     );
 }
