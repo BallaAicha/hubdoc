@@ -1,6 +1,8 @@
 import React from 'react';
 import { FileGrid } from '../components/FileGrid';
 import { FileItem } from '../types';
+import {useNavigate} from "react-router-dom";
+import {Plus} from "lucide-react";
 
 const documents: FileItem[] = [
   {
@@ -148,10 +150,21 @@ const documents: FileItem[] = [
 ];
 
 export function Documents() {
+  const navigate = useNavigate();
+
   return (
-    <div className="container mx-auto py-6">
-      <h1 className="text-2xl font-bold mb-6">Documents</h1>
-      <FileGrid files={documents} />
-    </div>
+      <div className="container mx-auto py-6">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Documents</h1>
+          <button
+              onClick={() => navigate('/documents/create')}
+              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+          >
+            <Plus className="h-5 w-5 mr-2" />
+            Create Document
+          </button>
+        </div>
+        <FileGrid files={documents} />
+      </div>
   );
 }

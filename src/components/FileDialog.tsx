@@ -1,113 +1,118 @@
-import React, { useState } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
 import { Download, ExternalLink, X } from 'lucide-react';
-import { FileItem, FileVersion } from '../types';
+import React, { Fragment, useState } from 'react';
+import { FileItem } from '../types';
 
 interface FileDialogProps {
   file: FileItem;
+  isOpen: boolean;
   onClose: () => void;
-  open: boolean;
 }
 
-export function FileDialog({ file, onClose, open }: FileDialogProps) {
-  const [selectedVersion, setSelectedVersion] = useState<FileVersion | undefined>(
-    file.versions?.[0]
+export function FileDialog({ file, isOpen, onClose }: FileDialogProps) {
+  const [selectedVersion, setSelectedVersion] = useState<Version | undefined>(
+      file.versions?.[0]
   );
 
-  if (!open) return null;
+  const handleAction = (action: 'download' | 'open') => {
+    if (!selectedVersion) return;
 
-  const handleDownload = () => {
-    if (selectedVersion) {
-      console.log('Downloading:', file.name, 'version:', selectedVersion.version);
-      // Implement actual download logic here
-    }
-  };
-
-  const handleOpenInBrowser = () => {
-    if (selectedVersion) {
-      console.log('Opening in browser:', file.name, 'version:', selectedVersion.version);
+    if (action === 'download') {
+      window.location.href = selectedVersion.url;
+    } else {
       window.open(selectedVersion.url, '_blank');
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-        <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="text-xl font-semibold">{file.name}</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-        
-        <div className="p-4 space-y-4">
-          <div className="flex items-center gap-2">
-            <span className="font-medium">Type:</span>
-            <span className="uppercase">{file.type}</span>
-          </div>
-          
-          <div className="space-y-2">
-            <h3 className="font-medium">Information</h3>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <span className="text-gray-600">Créé le</span>
-              <span>{file.createdAt}</span>
-              
-              <span className="text-gray-600">Mis à jour le</span>
-              <span>{file.updatedAt}</span>
-              
-              {file.version && (
-                <>
-                  <span className="text-gray-600">Version actuelle</span>
-                  <span>{file.version}</span>
-                </>
-              )}
-            </div>
-          </div>
-          
-          {file.description && (
-            <div className="space-y-2">
-              <h3 className="font-medium">Description</h3>
-              <p className="text-gray-600">{file.description}</p>
-            </div>
-          )}
+      <Transition appear show={isOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-10" onClose={onClose}>
+          <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0"
+              enterTo="opacity-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-25" />
+          </Transition.Child>
 
-          {file.versions && file.versions.length > 0 && (
-            <div className="space-y-2">
-              <h3 className="font-medium">Sélectionner une version</h3>
-              <select
-                className="w-full rounded-lg border border-gray-300 p-2"
-                value={selectedVersion?.version}
-                onChange={(e) => {
-                  const version = file.versions?.find(v => v.version === e.target.value);
-                  setSelectedVersion(version);
-                }}
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                  as={Fragment}
+                  enter="ease-out duration-300"
+                  enterFrom="opacity-0 scale-95"
+                  enterTo="opacity-100 scale-100"
+                  leave="ease-in duration-200"
+                  leaveFrom="opacity-100 scale-100"
+                  leaveTo="opacity-0 scale-95"
               >
-                {file.versions.map((version) => (
-                  <option key={version.version} value={version.version}>
-                    Version {version.version} ({version.date})
-                  </option>
-                ))}
-              </select>
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <Dialog.Title as="div" className="flex items-center justify-between">
+                    <h3 className="text-lg font-medium leading-6 text-gray-900">
+                      {file.name}
+                    </h3>
+                    <button
+                        type="button"
+                        className="text-gray-400 hover:text-gray-500"
+                        onClick={onClose}
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </Dialog.Title>
+
+                  <div className="mt-4">
+                    <label
+                        htmlFor="version"
+                        className="block text-sm font-medium text-gray-700"
+                    >
+                      Select Version
+                    </label>
+                    <select
+                        id="version"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
+                        value={selectedVersion?.version}
+                        onChange={(e) => {
+                          const version = file.versions?.find(
+                              (v) => v.version === e.target.value
+                          );
+                          setSelectedVersion(version);
+                        }}
+                    >
+                      {file.versions?.map((version) => (
+                          <option key={version.version} value={version.version}>
+                            Version {version.version} ({version.date})
+                          </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="mt-6 flex justify-end space-x-3">
+                    <button
+                        type="button"
+                        onClick={() => handleAction('download')}
+                        className="inline-flex items-center rounded-md border border-transparent bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                    >
+                      <Download className="mr-2 h-4 w-4" />
+                      Download
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => handleAction('open')}
+                        className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                    >
+                      <ExternalLink className="mr-2 h-4 w-4" />
+                      Open in Browser
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
             </div>
-          )}
-          
-          <div className="flex gap-2 mt-4">
-            <button 
-              className="flex-1 bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 flex items-center justify-center gap-2"
-              onClick={handleDownload}
-            >
-              <Download className="h-5 w-5" />
-              Télécharger
-            </button>
-            <button 
-              className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 flex items-center justify-center gap-2"
-              onClick={handleOpenInBrowser}
-            >
-              <ExternalLink className="h-5 w-5" />
-              Ouvrir
-            </button>
           </div>
-        </div>
-      </div>
-    </div>
+        </Dialog>
+      </Transition>
   );
 }

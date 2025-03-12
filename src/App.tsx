@@ -6,6 +6,9 @@ import { Documents } from './pages/Documents';
 import { QuickStart } from './pages/QuickStart';
 import {GenerateSpringProject} from "./pages/GenerateSpringProject.tsx";
 
+
+import {CreateDocumentVersion} from "./pages/CreateDocumentVersion.tsx";
+
 function App() {
   return (
     <Router>
@@ -17,6 +20,7 @@ function App() {
           <Route path="/quickstart" element={<QuickStart />} />
           <Route path="/settings" element={<div className="p-4">Settings page coming soon</div>} />
           <Route path="/generate-spring-project" element={<GenerateSpringProject />} />
+          <Route path="/documents/create" element={<CreateDocumentVersion />} />
         </Routes>
       </div>
     </Router>
