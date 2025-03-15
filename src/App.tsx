@@ -8,7 +8,9 @@ import { GenerateSpringProject } from './pages/GenerateSpringProject';
 import { CreateDocument } from './pages/CreateDocument'; // Nouvelle page ajoutée
 import { CreateDocumentVersion } from './pages/CreateDocumentVersion'; // Ajouté pour les versions
 import { Settings } from './pages/Settings';
-import { Login } from './pages/Login'; // Import de la page Login
+import { Login } from './pages/Login';
+import {MarkdownViewer} from "./pages/MarkdownViewer.tsx";
+import {APIDocumentation} from "./pages/APIDocumentation.tsx"; // Import de la page Login
 
 function App() {
     return (
@@ -29,6 +31,11 @@ function App() {
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/generate-spring-project" element={<GenerateSpringProject />} />
                     <Route path="/login" element={<Login />} /> {/* Route pour la page Login */}
+
+                    {/* Route dynamique pour des fichiers Markdown */}
+                    <Route path="/guide/:page" element={<MarkdownViewer />} />
+                    <Route path="/guide/nos-apis" element={<APIDocumentation />} />
+                    <Route path="/guide/nos-apis/:apiId" element={<APIDocumentation />} />
                 </Routes>
             </div>
         </Router>

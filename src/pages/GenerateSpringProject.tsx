@@ -1,154 +1,150 @@
-import React, { useState } from 'react';
-import { ChevronDown } from 'lucide-react'; // Pour une icône moderne de menu déroulant
+import React from "react";
+import { Box, Code2, Layers, Package, Terminal } from "lucide-react";
 
 export function GenerateSpringProject() {
-    const [projectName, setProjectName] = useState('');
-    const [javaVersion, setJavaVersion] = useState('17');
-    const [buildTool, setBuildTool] = useState('Maven');
-    const [dependencies, setDependencies] = useState<string[]>([]);
-
-    const predefinedDependencies = ['Platforme', 'Foundation', 'Outils internes'];
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        const config = {
-            projectName,
-            javaVersion,
-            buildTool,
-            dependencies,
-        };
-
-        // Simuler l'envoi des données via une API REST
-        const response = await fetch('/api/generate-project', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(config),
-        });
-
-        if (response.ok) {
-            alert('Projet généré avec succès!');
-        } else {
-            alert('Erreur lors de la génération du projet.');
-        }
-    };
-
-    const handleDependencyChange = (dep: string) => {
-        if (dependencies.includes(dep)) {
-            setDependencies(dependencies.filter((d) => d !== dep));
-        } else {
-            setDependencies([...dependencies, dep]);
-        }
-    };
-
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#e9041e] via-white to-gray-100 py-12 px-6">
-            <div className="max-w-3xl mx-auto bg-white shadow-2xl rounded-xl overflow-hidden">
-                {/* En-tête */}
-                <header className="bg-[#e9041e] text-white px-6 py-6 text-center">
-                    <h1 className="text-3xl font-extrabold tracking-wide">
-                        Générateur de projet Spring
-                    </h1>
-                    <p className="mt-2 text-sm">
-                        Créez facilement un projet Spring conforme aux normes de DEV.
-                    </p>
-                </header>
-
-                {/* Formulaire */}
-                <form className="px-8 py-10 space-y-8" onSubmit={handleSubmit}>
-                    {/* Nom du projet */}
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-600">
-                            Nom du projet <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            value={projectName}
-                            onChange={(e) => setProjectName(e.target.value)}
-                            placeholder="Entrez le nom du projet"
-                            className="mt-2 w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#e9041e] focus:ring-2 focus:ring-[#e9041e] text-gray-700"
-                            required
-                        />
+            <div className="container mx-auto px-4 py-12">
+                <div className="max-w-4xl mx-auto">
+                    <div className="text-center mb-10">
+                        <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                            Générateur de projet Spring Hexagonal
+                        </h1>
+                        <p className="text-lg text-gray-600">
+                            Générez un projet Spring Boot basé sur une architecture hexagonale.
+                        </p>
                     </div>
 
-                    {/* Version de Java */}
-                    <div className="relative">
-                        <label className="block text-sm font-semibold text-gray-600">
-                            Version de Java
-                        </label>
-                        <div className="mt-2 relative">
-                            <select
-                                value={javaVersion}
-                                onChange={(e) => setJavaVersion(e.target.value)}
-                                className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#e9041e] focus:ring-2 focus:ring-[#e9041e] text-gray-700 bg-white"
-                            >
-                                <option value="8">Java 8</option>
-                                <option value="11">Java 11</option>
-                                <option value="17">Java 17 (recommandé)</option>
-                                <option value="20">Java 20</option>
-                            </select>
-                            <ChevronDown className="absolute top-1/2 transform -translate-y-1/2 right-4 text-gray-400 w-5 h-5 pointer-events-none" />
-                        </div>
-                    </div>
-
-                    {/* Outil de build */}
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-600">
-                            Outil de build
-                        </label>
-                        <div className="mt-2 relative">
-                            <select
-                                value={buildTool}
-                                onChange={(e) => setBuildTool(e.target.value)}
-                                className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#e9041e] focus:ring-2 focus:ring-[#e9041e] text-gray-700 bg-white"
-                            >
-                                <option value="Maven">Maven</option>
-                                <option value="Gradle">Gradle</option>
-                            </select>
-                            <ChevronDown className="absolute top-1/2 transform -translate-y-1/2 right-4 text-gray-400 w-5 h-5 pointer-events-none" />
-                        </div>
-                    </div>
-
-                    {/* Dépendances */}
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-600">
-                            Dépendances
-                        </label>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                            {predefinedDependencies.map((dep) => (
-                                <div
-                                    key={dep}
-                                    className="flex items-center bg-gray-100 rounded-lg px-4 py-3 cursor-pointer transition hover:bg-[#efccd2]"
-                                >
+                    <div className="bg-white rounded-xl shadow-xl p-8">
+                        <form className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Nom du projet
+                                    </label>
                                     <input
-                                        type="checkbox"
-                                        className="mr-3 accent-[#e9041e] w-5 h-5"
-                                        checked={dependencies.includes(dep)}
-                                        onChange={() => handleDependencyChange(dep)}
+                                        type="text"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#e9041e] focus:border-[#e9041e]"
+                                        placeholder="Entrez le nom du projet"
+                                        required
                                     />
-                                    <label className="text-gray-700 text-sm">{dep}</label>
                                 </div>
-                            ))}
-                        </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Group ID
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#e9041e] focus:border-[#e9041e]"
+                                        placeholder="com.example"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Description
+                                </label>
+                                <textarea
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#e9041e] focus:border-[#e9041e]"
+                                    rows={3}
+                                    placeholder="Description du projet"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Version de Java
+                                    </label>
+                                    <select
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#e9041e] focus:border-[#e9041e]"
+                                    >
+                                        <option value="21">Java 21 (LTS)</option>
+                                        <option value="17">Java 17 (LTS)</option>
+                                        <option value="11">Java 11 (LTS)</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Version de Gradle
+                                    </label>
+                                    <select
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#e9041e] focus:border-[#e9041e]"
+                                    >
+                                        <option value="8.5">Gradle 8.5</option>
+                                        <option value="8.4">Gradle 8.4</option>
+                                        <option value="8.3">Gradle 8.3</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="bg-gray-50 rounded-lg p-6">
+                                <h3 className="text-lg font-medium text-gray-900 mb-4">Structure du projet</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                                        <div className="flex items-center text-gray-700 mb-2">
+                                            <Box className="w-5 h-5 mr-2 text-[#e9041e]" />
+                                            <span className="font-medium">Module Core</span>
+                                        </div>
+                                        <p className="text-sm text-gray-600">
+                                            Logique métier et entités de domaine
+                                        </p>
+                                    </div>
+                                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                                        <div className="flex items-center text-gray-700 mb-2">
+                                            <Layers className="w-5 h-5 mr-2 text-[#e9041e]" />
+                                            <span className="font-medium">Module API</span>
+                                        </div>
+                                        <p className="text-sm text-gray-600">
+                                            Contrôleurs REST et adaptateurs primaires
+                                        </p>
+                                    </div>
+                                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                                        <div className="flex items-center text-gray-700 mb-2">
+                                            <Code2 className="w-5 h-5 mr-2 text-[#e9041e]" />
+                                            <span className="font-medium">Module Service</span>
+                                        </div>
+                                        <p className="text-sm text-gray-600">
+                                            Services et adaptateurs secondaires
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-gray-50 rounded-lg p-6">
+                                <h3 className="text-lg font-medium text-gray-900 mb-4">Dépendances incluses</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="flex items-center text-gray-700">
+                                        <Package className="w-5 h-5 mr-2 text-green-600" />
+                                        <span>Plateform & Foundation (inclus par défaut)</span>
+                                    </div>
+                                    <div className="flex items-center text-gray-700">
+                                        <Terminal className="w-5 h-5 mr-2 text-green-600" />
+                                        <span>SGABS  Starter</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="pt-4">
+                                <button
+                                    type="submit"
+                                    className="w-full flex items-center justify-center px-6 py-3 text-base font-medium rounded-md bg-[#e9041e] text-white hover:bg-red-600 focus:ring-2 focus:ring-red-500 transition"
+                                >
+                                    Générer le projet
+                                </button>
+                            </div>
+                        </form>
                     </div>
 
-                    {/* Bouton de soumission */}
-                    <div>
-                        <button
-                            type="submit"
-                            className="w-full py-3 rounded-lg bg-[#e9041e] text-white font-semibold hover:bg-red-600 transition focus:outline-none focus:ring-2 focus:ring-red-500 flex items-center justify-center gap-3"
-                        >
-                            Générer le projet
-                        </button>
+                    <div className="mt-8 text-center text-sm text-gray-500">
+                        Les projets générés incluent Plateform  et suivent les meilleures pratiques des Normes dev de SGABS.
                     </div>
-                </form>
+                </div>
             </div>
-
-            <footer className="mt-6 text-center">
-                <p className="text-sm text-gray-500">
-                    © 2024 Générateur Spring. Tous droits réservés.
-                </p>
-            </footer>
         </div>
     );
 }

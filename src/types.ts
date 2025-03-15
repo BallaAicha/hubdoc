@@ -1,21 +1,23 @@
+// types/index.ts
 export interface FileVersion {
   version: string;
   date: string;
   url: string;
 }
 
-// types/index.ts
 export interface FileItem {
   id: string;
   name: string;
-  type: 'pdf' | 'folder'; // Décrit si c'est un fichier ou un dossier
+  type: 'pdf' | 'folder' | 'markdown'  | 'api'; // Ajout de 'markdown' pour représenter un fichier Markdown
   createdAt: string;
   updatedAt: string;
   description: string;
-  version?: string; // Optionnel : utilisé uniquement pour les fichiers
-  versions?: Array<{ version: string; date: string; url: string }>; // Versions d'un fichier
+  version?: string; // Optionnel : utilisé uniquement pour les fichiers versionnés
+  versions?: Array<FileVersion>; // Versions d'un fichier (PDF ou autre)
   children?: FileItem[]; // Optionnel : uniquement présent pour les dossiers
+    icon?: React.ComponentType; // Icône associée au fichier
 }
+
 export interface RecentPresentation {
   id: string;
   title: string;

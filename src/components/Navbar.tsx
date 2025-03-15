@@ -6,15 +6,15 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-      <nav className="bg-[#e9041e] text-white p-4">
+      <nav className="bg-[#C4122E] text-white p-4">
         <div className="container mx-auto flex items-center justify-between">
           {/* Logo and title */}
           <Link to="/" className="text-xl font-bold flex items-center gap-2">
-            <img
-                src="assets/logo-societe-generale.png"
-                alt="Société Générale Logo"
-                className="h-10 w-10"
-            />
+            {/*<img*/}
+            {/*    src="assets/logo-societe-generale.png"*/}
+            {/*    alt="Société Générale Logo"*/}
+            {/*    className="h-10 w-10"*/}
+            {/*/>*/}
             SGABS - HUB DOC
           </Link>
 
@@ -36,19 +36,22 @@ export function Navbar() {
               <Home className="h-5 w-5" />
               Accueil
             </Link>
-            <Link
-                to="/documents"
-                className="flex items-center gap-2 hover:text-orange-200"
-            >
-              <Files className="h-5 w-5" />
-              Documents
-            </Link>
+
             <Link
                 to="/quickstart"
                 className="flex items-center gap-2 hover:text-orange-200"
             >
               <Rocket className="h-5 w-5" />
               Démarrage rapide
+            </Link>
+
+
+            <Link
+                to="/documents"
+                className="flex items-center gap-2 hover:text-orange-200"
+            >
+              <Files className="h-5 w-5" />
+              Documents
             </Link>
             <Link
                 to="/settings"
@@ -71,14 +74,7 @@ export function Navbar() {
                 <Home className="h-5 w-5" />
                 Accueil
               </Link>
-              <Link
-                  to="/documents"
-                  className="flex items-center gap-2 hover:text-orange-200"
-                  onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <Files className="h-5 w-5" />
-                Documents
-              </Link>
+
               <Link
                   to="/quickstart"
                   className="flex items-center gap-2 hover:text-orange-200"
@@ -87,6 +83,15 @@ export function Navbar() {
                 <Rocket className="h-5 w-5" />
                 Démarrage rapide
               </Link>
+              <Link
+                  to="/documents"
+                  className="flex items-center gap-2 hover:text-orange-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Files className="h-5 w-5" />
+                Documents
+              </Link>
+
               <Link
                   to="/settings"
                   className="flex items-center gap-2 hover:text-orange-200"

@@ -28,7 +28,7 @@ const recentPresentations: RecentPresentation[] = [
 
 export function Home() {
   return (
-      <div className="min-h-screen bg-gradient-to-br from-[#e9041e] via-gray-100 to-gray-50 py-12 md:px-6 px-4">
+      <div className="min-h-screen bg-gradient-to-br from-[#C4122E] via-gray-100 to-gray-50 py-12 md:px-6 px-4">
         {/* En-tête Principal */}
         <header className="max-w-5xl mx-auto mb-6 text-center">
           <h1 className="text-4xl font-bold text-white mb-4">Bienvenue sur votre Page d'Accueil</h1>
