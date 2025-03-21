@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileItem } from '../types';
 import {
@@ -25,6 +24,7 @@ const quickStartGuides: FileItem[] = [
     createdAt: '2024-03-01',
     updatedAt: '2024-04-15',
     icon: Book,
+    size: null,
   },
   {
     id: 'nos-apis',
@@ -34,6 +34,7 @@ const quickStartGuides: FileItem[] = [
     createdAt: '2024-03-01',
     updatedAt: '2024-04-18',
     icon: Code,
+    size: null,
   }
 ];
 
@@ -47,6 +48,7 @@ const popularDocs: FileItem[] = [
     createdAt: '2024-03-10',
     updatedAt: '2024-04-12',
     icon: ShieldCheck,
+    size: null,
   },
   {
     id: 'performances',
@@ -56,6 +58,7 @@ const popularDocs: FileItem[] = [
     createdAt: '2024-03-15',
     updatedAt: '2024-04-10',
     icon: Zap,
+    size: null,
   }
 ];
 
@@ -138,7 +141,7 @@ function GuideCard({ guide }: { guide: FileItem }) {
   );
 }
 
-function StatCard({ icon: Icon, value, label }: { icon: any, value: string, label: string }) {
+function StatCard({ icon: Icon, value, label }: { icon: React.ElementType, value: string, label: string }) {
   return (
       <div className="bg-white rounded-xl p-6 border border-neutral-200 shadow-sm">
         <div className="flex items-center gap-4">

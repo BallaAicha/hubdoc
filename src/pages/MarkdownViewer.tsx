@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useParams } from 'react-router-dom';
 import remarkGfm from 'remark-gfm';
@@ -186,7 +186,7 @@ export function MarkdownViewer() {
                                 />
                             ),
                             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                            code: ({ node, className, inline, ...props }) => {
+                            code: ({ className, inline = false, ...props }: { className?: string, inline?: boolean } & React.HTMLAttributes<HTMLElement>) => {
                                 const match = /language-(\w+)/.exec(className || '');
                                 return inline ? (
                                     <code

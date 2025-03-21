@@ -9,7 +9,7 @@ import {
     Info
 } from 'lucide-react';
 import clsx from 'clsx';
-import { colors } from '../constants/colors';
+
 
 export function CreateDocument() {
     const navigate = useNavigate();
@@ -275,7 +275,8 @@ export function CreateDocument() {
             </main>
 
             {/* Add custom styles */}
-            <style jsx>{`
+            <style dangerouslySetInnerHTML={{
+              __html: `
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(-10px); }
           to { opacity: 1; transform: translateY(0); }
@@ -283,7 +284,7 @@ export function CreateDocument() {
         .animate-fadeIn {
           animation: fadeIn 0.3s ease-out;
         }
-      `}</style>
+      `}} />
         </div>
     );
 }

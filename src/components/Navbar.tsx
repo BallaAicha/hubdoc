@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Files, Home, Rocket, Settings, Menu, X, User, LogOut } from 'lucide-react';
 import clsx from 'clsx';

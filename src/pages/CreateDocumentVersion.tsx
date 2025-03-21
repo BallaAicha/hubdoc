@@ -36,7 +36,8 @@ export function CreateDocumentVersion() {
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-            setFormData((prev) => ({ ...prev, file: e.target.files[0] }));
+            const file = e.target.files[0];
+            setFormData((prev) => ({ ...prev, file }));
         }
     };
 
@@ -339,7 +340,7 @@ export function CreateDocumentVersion() {
                                     </div>
                                 ) : (
                                     <div className="divide-y divide-neutral-200">
-                                        {Object.entries(formData.metadata).map(([key, value], index) => (
+                                        {Object.entries(formData.metadata).map(([key, value]) => (
                                             <div key={key} className="grid grid-cols-12 gap-2 p-2">
                                                 <input
                                                     type="text"

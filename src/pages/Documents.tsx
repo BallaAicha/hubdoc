@@ -18,6 +18,7 @@ const documents: FileItem[] = [
         updatedAt: '16 nov. 2023',
         version: '12.6',
         description: 'Description des cinématiques des transferts',
+        size: '2.3 MB', // Added size property
         versions: [
             {version: '12.6', date: '16 nov. 2023', url: '/docs/presentation-v12.6.pdf'},
             {version: '12.5', date: '10 oct. 2023', url: '/docs/presentation-v12.5.pdf'},
@@ -30,6 +31,7 @@ const documents: FileItem[] = [
         createdAt: '15 mars 2024',
         updatedAt: '15 mars 2024',
         description: 'Collection complète des messages système',
+        size: 'N/A', // Added size property for folders
         children: [
             {
                 id: '2-1',
@@ -39,6 +41,7 @@ const documents: FileItem[] = [
                 updatedAt: '15 mars 2024',
                 version: '1.0',
                 description: 'Documentation des messages principaux',
+                size: '1.5 MB', // Added size property
                 versions: [
                     {version: '1.0', date: '15 mars 2024', url: '/docs/messages-base-v1.0.pdf'},
                 ],
@@ -50,6 +53,7 @@ const documents: FileItem[] = [
                 createdAt: '15 mars 2024',
                 updatedAt: '15 mars 2024',
                 description: 'Exemples avancés de notifications',
+                size: 'N/A', // Added size property for folders
                 children: [
                     {
                         id: '2-2-1',
@@ -59,6 +63,7 @@ const documents: FileItem[] = [
                         updatedAt: '16 mars 2024',
                         version: '1.0',
                         description: 'Exemple de notification avancée',
+                        size: '850 KB', // Added size property
                         versions: [
                             {version: '1.0', date: '16 mars 2024', url: '/docs/notification-a-v1.0.pdf'},
                         ],
@@ -75,6 +80,7 @@ const documents: FileItem[] = [
         updatedAt: '15 mars 2024',
         version: '2.1',
         description: 'Instructions pour le déploiement',
+        size: '3.7 MB', // Added size property
         versions: [
             {version: '2.1', date: '15 mars 2024', url: '/docs/guide-deployment-v2.1.pdf'},
         ],

@@ -1,4 +1,4 @@
-import { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { X, FileText, Check, AlertCircle } from 'lucide-react';
 import clsx from 'clsx';
@@ -39,7 +39,7 @@ export function CreateDocumentDialog({ isOpen, onClose, onCreateDocument }: Crea
             setTouched({});
             setLoading(false);
         }
-    }, [isOpen]);
+    }, [initialFormState, isOpen]);
 
     const validateForm = (): boolean => {
         const newErrors: FormErrors = {};

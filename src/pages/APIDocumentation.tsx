@@ -90,7 +90,7 @@ export function APIDocumentation() {
                 throw new Error('API introuvable.');
             }
             return await response.text();
-        } catch (error) {
+        } catch {
             return '# Erreur :\nAPI introuvable ou une autre erreur est survenue.';
         } finally {
             setIsLoading(false);
@@ -264,7 +264,7 @@ export function APIDocumentation() {
                                     <div className="flex-1">
                                         <div className="flex items-center">
                                             <h1 className="text-xl font-bold text-neutral-800">{selectedApi.name}</h1>
-                                            <Badge variant="success" className="ml-3">v1.0</Badge>
+                                            <Badge variant="success">v1.0</Badge>
                                         </div>
                                         <p className="text-sm text-neutral-500 mt-1">{selectedApi.description}</p>
                                     </div>

@@ -13,7 +13,7 @@ import {
   FileArchive,
   File,
 } from 'lucide-react';
-import React, { Fragment, useState } from 'react';
+import  { Fragment, useState } from 'react';
 import { FileItem } from '../types';
 import clsx from 'clsx';
 
