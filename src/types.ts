@@ -6,6 +6,7 @@ export interface FileVersion {
 }
 
 export interface FileItem {
+    size: any;
   id: string;
   name: string;
   type: 'pdf' | 'folder' | 'markdown'  | 'api'; // Ajout de 'markdown' pour représenter un fichier Markdown

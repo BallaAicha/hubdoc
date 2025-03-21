@@ -1,0 +1,40 @@
+// Palette de couleurs (à placer dans un fichier constants/colors.ts)
+export const colors = {
+    primary: {
+        50: '#fef2f2',
+        100: '#fee2e2',
+        500: '#ef4444',
+        600: '#dc2626',
+        700: '#b91c1c',
+        800: '#991b1b',
+        900: '#7f1d1d',
+    },
+    secondary: {
+        50: '#fff7ed',
+        100: '#ffedd5',
+        500: '#f97316',
+        600: '#ea580c',
+        700: '#c2410c',
+        800: '#9a3412',
+    },
+    neutral: {
+        50: '#f9fafb',
+        100: '#f3f4f6',
+        200: '#e5e7eb',
+        300: '#d1d5db',
+        400: '#9ca3af',
+        500: '#6b7280',
+        600: '#4b5563',
+        700: '#374151',
+        800: '#1f2937',
+        900: '#111827',
+    },
+    background: {
+        light: '#ffffff',
+        dark: '#f3f4f6',
+    },
+    success: '#10b981',
+    warning: '#f59e0b',
+    error: '#ef4444',
+    info: '#3b82f6',
+}

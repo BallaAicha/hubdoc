@@ -1,63 +1,104 @@
-# API 4 - Supprimer un élément
+# 🔐 API d'Authentification
 
-## Description
-Cette API permet de supprimer des éléments de manière sécurisée avec possibilité de restauration.
+**Méthode:** `POST`  
+**Endpoint:** `/api/auth/login`  
+**Version:** `v1.0`
 
-**Base URL:** `/api/items`
+## 📋 Aperçu
 
-## Suppression d'un élément
-`DELETE /api/items/:id`
+Cette API permet d'authentifier un utilisateur et récupérer un token JWT pour les requêtes ultérieures.
 
-### Headers requis
-```
-Authorization: Bearer <votre-token>
-Content-Type: application/json
-```
+> ℹ️ **Info:** Le token reçu doit être inclus dans tous les appels API suivants.
 
-### Paramètres optionnels
-```json
-{
-  "permanent": false,
-  "reason": "Doublon"
-}
-```
+## 📥 Requête
 
-### Réponse
-```json
-{
-  "id": "item_123",
-  "status": "deleted",
-  "deleted_at": "2024-03-15T10:30:00Z",
-  "can_restore": true,
-  "restore_until": "2024-04-15T10:30:00Z"
-}
-```
+### En-têtes requis
 
-## Restauration d'un élément
-`POST /api/items/:id/restore`
-
-### Réponse
-```json
-{
-  "id": "item_123",
-  "status": "restored",
-  "restored_at": "2024-03-15T10:35:00Z"
-}
-```
-
-## Suppression par lot
-`DELETE /api/items/batch`
+| Nom           | Valeur         | Description                 |
+|---------------|----------------|-----------------------------|
+| Content-Type  | application/json | Format des données envoyées |
 
 ### Corps de la requête
+
 ```json
 {
-  "ids": ["item_123", "item_456"],
-  "permanent": false
+  "email": "user@example.com",
+  "password": "supersecretpassword"
 }
 ```
 
-## Politiques de suppression
-- Suppression douce par défaut (30 jours de rétention)
-- Suppression permanente sur demande explicite
-- Journal d'audit des suppressions
-- Restrictions basées sur les rôles
+### Paramètres
+
+| Paramètre | Type   | Requis | Description                     |
+|-----------|--------|--------|---------------------------------|
+| email     | string | Oui    | Adresse email de l'utilisateur  |
+| password  | string | Oui    | Mot de passe de l'utilisateur   |
+
+## 📤 Réponse
+
+### Réponse positive (200 OK)
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expires_in": 3600
+}
+```
+
+### Paramètres de réponse
+
+| Paramètre  | Type    | Description                                   |
+|------------|---------|-----------------------------------------------|
+| token      | string  | Token JWT à utiliser pour les requêtes futures |
+| expires_in | integer | Durée de validité du token en secondes        |
+
+## ⚠️ Erreurs possibles
+
+| Code | Message                   | Description                                |
+|------|---------------------------|--------------------------------------------|
+| 400  | Invalid credentials       | Email ou mot de passe incorrect            |
+| 429  | Too many attempts         | Trop de tentatives de connexion échouées   |
+| 500  | Internal server error     | Erreur interne du serveur                  |
+
+## 📚 Exemples d'utilisation
+
+### Exemple avec cURL
+
+```bash
+curl -X POST https://api.example.com/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com", "password": "supersecretpassword"}'
+```
+
+### Exemple avec JavaScript (fetch)
+
+```javascript
+const response = await fetch('https://api.example.com/api/auth/login', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    email: 'user@example.com',
+    password: 'supersecretpassword'
+  })
+});
+
+const data = await response.json();
+console.log(data.token); // Utilisez ce token pour les futures requêtes
+```
+
+## 🔗 Prochaines étapes
+
+* [Récupération du profil utilisateur](/api/users/profile)
+* [Modification du mot de passe](/api/users/change-password)
+* [Déconnexion](/api/auth/logout)
+
+---
+
+> 📝 **Note de sécurité:**
+> - Assurez-vous de toujours transmettre les identifiants via HTTPS.
+> - Pour toute requête authentifiée ultérieure, ajoutez l'en-tête:
+    >   ```
+    >   Authorization: Bearer {votre-token}
+    >   ```

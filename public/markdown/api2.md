@@ -1,58 +1,104 @@
-# API 2 - Récupération des données
+# 🔐 API d'Authentification
 
-## Description
-Cette API permet de récupérer les données de votre application de manière efficace et sécurisée.
+**Méthode:** `POST`  
+**Endpoint:** `/api/auth/login`  
+**Version:** `v1.0`
 
-**Base URL:** `/api/data`
+## 📋 Aperçu
 
-## Endpoints
+Cette API permet d'authentifier un utilisateur et récupérer un token JWT pour les requêtes ultérieures.
 
-### Récupérer tous les éléments
-`GET /api/data/items`
+> ℹ️ **Info:** Le token reçu doit être inclus dans tous les appels API suivants.
 
-#### Paramètres de requête
-| Paramètre | Type    | Description                    |
-|-----------|---------|--------------------------------|
-| page      | number  | Numéro de la page (défaut: 1)  |
-| limit     | number  | Éléments par page (défaut: 10) |
-| sort      | string  | Champ de tri                   |
+## 📥 Requête
 
-#### Exemple de réponse
+### En-têtes requis
+
+| Nom           | Valeur         | Description                 |
+|---------------|----------------|-----------------------------|
+| Content-Type  | application/json | Format des données envoyées |
+
+### Corps de la requête
+
 ```json
 {
-  "items": [
-    {
-      "id": "123",
-      "name": "Example Item",
-      "created_at": "2024-03-15T10:30:00Z"
-    }
-  ],
-  "total": 100,
-  "page": 1,
-  "pages": 10
+  "email": "user@example.com",
+  "password": "supersecretpassword"
 }
 ```
 
-### Récupérer un élément spécifique
-`GET /api/data/items/:id`
+### Paramètres
 
-#### Exemple de réponse
+| Paramètre | Type   | Requis | Description                     |
+|-----------|--------|--------|---------------------------------|
+| email     | string | Oui    | Adresse email de l'utilisateur  |
+| password  | string | Oui    | Mot de passe de l'utilisateur   |
+
+## 📤 Réponse
+
+### Réponse positive (200 OK)
+
 ```json
 {
-  "id": "123",
-  "name": "Example Item",
-  "description": "Detailed description",
-  "created_at": "2024-03-15T10:30:00Z",
-  "updated_at": "2024-03-15T10:30:00Z"
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expires_in": 3600
 }
 ```
 
-## Gestion des erreurs
-| Code | Description                    |
-|------|--------------------------------|
-| 400  | Requête invalide              |
-| 401  | Non authentifié               |
-| 403  | Non autorisé                  |
-| 404  | Ressource non trouvée         |
-| 429  | Trop de requêtes              |
-| 500  | Erreur serveur                |
+### Paramètres de réponse
+
+| Paramètre  | Type    | Description                                   |
+|------------|---------|-----------------------------------------------|
+| token      | string  | Token JWT à utiliser pour les requêtes futures |
+| expires_in | integer | Durée de validité du token en secondes        |
+
+## ⚠️ Erreurs possibles
+
+| Code | Message                   | Description                                |
+|------|---------------------------|--------------------------------------------|
+| 400  | Invalid credentials       | Email ou mot de passe incorrect            |
+| 429  | Too many attempts         | Trop de tentatives de connexion échouées   |
+| 500  | Internal server error     | Erreur interne du serveur                  |
+
+## 📚 Exemples d'utilisation
+
+### Exemple avec cURL
+
+```bash
+curl -X POST https://api.example.com/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com", "password": "supersecretpassword"}'
+```
+
+### Exemple avec JavaScript (fetch)
+
+```javascript
+const response = await fetch('https://api.example.com/api/auth/login', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    email: 'user@example.com',
+    password: 'supersecretpassword'
+  })
+});
+
+const data = await response.json();
+console.log(data.token); // Utilisez ce token pour les futures requêtes
+```
+
+## 🔗 Prochaines étapes
+
+* [Récupération du profil utilisateur](/api/users/profile)
+* [Modification du mot de passe](/api/users/change-password)
+* [Déconnexion](/api/auth/logout)
+
+---
+
+> 📝 **Note de sécurité:**
+> - Assurez-vous de toujours transmettre les identifiants via HTTPS.
+> - Pour toute requête authentifiée ultérieure, ajoutez l'en-tête:
+    >   ```
+    >   Authorization: Bearer {votre-token}
+    >   ```

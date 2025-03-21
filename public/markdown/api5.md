@@ -1,73 +1,104 @@
-# API 5 - Statistiques
+# 🔐 API d'Authentification
 
-## Description
-Cette API fournit des métriques et des analyses détaillées sur l'utilisation de votre application.
+**Méthode:** `POST`  
+**Endpoint:** `/api/auth/login`  
+**Version:** `v1.0`
 
-**Base URL:** `/api/stats`
+## 📋 Aperçu
 
-## Métriques générales
-`GET /api/stats/overview`
+Cette API permet d'authentifier un utilisateur et récupérer un token JWT pour les requêtes ultérieures.
 
-### Paramètres de requête
-| Paramètre | Type   | Description                    |
-|-----------|--------|--------------------------------|
-| from      | string | Date de début (YYYY-MM-DD)     |
-| to        | string | Date de fin (YYYY-MM-DD)       |
-| interval  | string | hour, day, week, month         |
+> ℹ️ **Info:** Le token reçu doit être inclus dans tous les appels API suivants.
 
-### Exemple de réponse
+## 📥 Requête
+
+### En-têtes requis
+
+| Nom           | Valeur         | Description                 |
+|---------------|----------------|-----------------------------|
+| Content-Type  | application/json | Format des données envoyées |
+
+### Corps de la requête
+
 ```json
 {
-  "period": {
-    "from": "2024-02-15",
-    "to": "2024-03-15"
-  },
-  "metrics": {
-    "total_users": 1250,
-    "active_users": 890,
-    "total_requests": 45678,
-    "average_response_time": 125
-  },
-  "trends": {
-    "users_growth": "+5.3%",
-    "usage_growth": "+12.1%"
-  }
+  "email": "user@example.com",
+  "password": "supersecretpassword"
 }
 ```
-
-## Métriques détaillées
-`GET /api/stats/detailed`
-
-### Exemple de réponse
-```json
-{
-  "requests_by_endpoint": {
-    "/api/users": 12345,
-    "/api/items": 23456,
-    "/api/files": 9876
-  },
-  "response_times": {
-    "p50": 100,
-    "p90": 250,
-    "p99": 500
-  },
-  "error_rates": {
-    "4xx": "2.3%",
-    "5xx": "0.1%"
-  }
-}
-```
-
-## Export des données
-`GET /api/stats/export`
-
-Formats disponibles :
-- CSV
-- JSON
-- Excel
 
 ### Paramètres
-- `format`: Format d'export (csv, json, xlsx)
-- `metrics`: Liste des métriques à inclure
-- `from`: Date de début
-- `to`: Date de fin
+
+| Paramètre | Type   | Requis | Description                     |
+|-----------|--------|--------|---------------------------------|
+| email     | string | Oui    | Adresse email de l'utilisateur  |
+| password  | string | Oui    | Mot de passe de l'utilisateur   |
+
+## 📤 Réponse
+
+### Réponse positive (200 OK)
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expires_in": 3600
+}
+```
+
+### Paramètres de réponse
+
+| Paramètre  | Type    | Description                                   |
+|------------|---------|-----------------------------------------------|
+| token      | string  | Token JWT à utiliser pour les requêtes futures |
+| expires_in | integer | Durée de validité du token en secondes        |
+
+## ⚠️ Erreurs possibles
+
+| Code | Message                   | Description                                |
+|------|---------------------------|--------------------------------------------|
+| 400  | Invalid credentials       | Email ou mot de passe incorrect            |
+| 429  | Too many attempts         | Trop de tentatives de connexion échouées   |
+| 500  | Internal server error     | Erreur interne du serveur                  |
+
+## 📚 Exemples d'utilisation
+
+### Exemple avec cURL
+
+```bash
+curl -X POST https://api.example.com/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com", "password": "supersecretpassword"}'
+```
+
+### Exemple avec JavaScript (fetch)
+
+```javascript
+const response = await fetch('https://api.example.com/api/auth/login', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    email: 'user@example.com',
+    password: 'supersecretpassword'
+  })
+});
+
+const data = await response.json();
+console.log(data.token); // Utilisez ce token pour les futures requêtes
+```
+
+## 🔗 Prochaines étapes
+
+* [Récupération du profil utilisateur](/api/users/profile)
+* [Modification du mot de passe](/api/users/change-password)
+* [Déconnexion](/api/auth/logout)
+
+---
+
+> 📝 **Note de sécurité:**
+> - Assurez-vous de toujours transmettre les identifiants via HTTPS.
+> - Pour toute requête authentifiée ultérieure, ajoutez l'en-tête:
+    >   ```
+    >   Authorization: Bearer {votre-token}
+    >   ```
