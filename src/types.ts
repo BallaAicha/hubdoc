@@ -16,7 +16,9 @@ export interface FileItem {
   version?: string; // Optionnel : utilisé uniquement pour les fichiers versionnés
   versions?: Array<FileVersion>; // Versions d'un fichier (PDF ou autre)
   children?: FileItem[]; // Optionnel : uniquement présent pour les dossiers
-    icon?: React.ComponentType; // Icône associée au fichier
+    icon?: React.ComponentType; // Icône associée au fichier,
+  readTime : string;
+  complexity : string;
 }
 
 export interface RecentPresentation {
