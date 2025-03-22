@@ -14,7 +14,7 @@ import {
   File,
 } from 'lucide-react';
 import  { Fragment, useState } from 'react';
-import { FileItem } from '../types';
+import { FileItem } from '../test.ts';
 import clsx from 'clsx';
 
 interface FileDialogProps {

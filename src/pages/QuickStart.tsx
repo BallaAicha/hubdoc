@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { FileItem } from '../types';
+import { FileItem } from '../test.ts';
 import {
   Plus,
   FileText,

@@ -4,7 +4,7 @@ import {
   AlertCircle, Calendar, ChevronRight, Search,
   Bell, Users, BookOpen, BarChart, Briefcase, Clock
 } from 'lucide-react';
-import { RecentPresentation } from '../types';
+import { RecentPresentation } from '../test.ts';
 import clsx from 'clsx';
 
 // Données des présentations récentes

@@ -1,5 +1,5 @@
 import  { useState } from 'react';
-import { FileItem } from '../types';
+import { FileItem } from '../test.ts';
 import {
     File, Folder, User, Clock, Calendar, Eye, Download,
     FileText, FileSpreadsheet, FileImage, FileArchive
