@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import {useNavigate, useParams, useSearchParams} from 'react-router-dom';
 import {
     FileText,
-    Save,
     ArrowLeft,
     X,
     AlertCircle,
@@ -13,9 +12,10 @@ import {
     Clock,
     Calendar,
     LayoutGrid,
-    Bookmark
+    Bookmark, Plus
 } from 'lucide-react';
 import clsx from 'clsx';
+import {useCreateFolder} from "../hooks/useCreateFolder.ts";
 
 // Types de documents avec des métadonnées enrichies
 const DOCUMENT_TYPES = [
@@ -47,6 +47,18 @@ const DOCUMENT_TYPES = [
 
 export function CreateDocument() {
     const navigate = useNavigate();
+    // Capturer le folderId à partir des paramètres d'URL
+    const { folderId } = useParams();
+    const { parentId } = useParams(); // Récupérer le parentId
+
+    // Récupérer éventuellement parentId depuis les paramètres de requête pour la compatibilité
+    const [searchParams] = useSearchParams();
+    const parentIdFromQuery = searchParams.get('parentId');
+
+    // Calculer le parentId effectif en priorisant celui de l'URL
+    const effectiveParentId = folderId ? parseInt(folderId) :
+        parentIdFromQuery ? parseInt(parentIdFromQuery) : null;
+
     const [formData, setFormData] = useState({
         name: '',
         description: '',
@@ -58,6 +70,20 @@ export function CreateDocument() {
     const [showHelp, setShowHelp] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [typeDropdownOpen, setTypeDropdownOpen] = useState(false);
+
+    const createFolder = useCreateFolder(() => {
+        // Success callback
+        document.getElementById('success-message')?.classList.remove('hidden');
+        setTimeout(() => {
+            // Si on était en train de créer un sous-dossier, retourner au dossier parent
+            if (effectiveParentId) {
+                navigate(`/documents/${effectiveParentId}`);
+            } else {
+                navigate('/documents');
+            }
+        }, 1200);
+    });
+
 
     // Animation d'entrée
     useEffect(() => {
@@ -77,6 +103,8 @@ export function CreateDocument() {
         return Object.keys(newErrors).length === 0;
     };
 
+
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setFormSubmitted(true);
@@ -85,22 +113,18 @@ export function CreateDocument() {
             setIsSubmitting(true);
 
             try {
-                // Simuler une requête API
-                await new Promise(resolve => setTimeout(resolve, 800));
-                console.log('Nouveau document soumis:', formData);
-
-                // Afficher un message de succès temporaire avant la redirection
-                document.getElementById('success-message')?.classList.remove('hidden');
-
-                setTimeout(() => {
-                    navigate('/documents');
-                }, 1200);
+                await createFolder.mutateAsync({
+                    name: formData.name,
+                    description: formData.description,
+                    parentId: parentId ? parseInt(parentId) : null
+                });
             } catch (error) {
-                console.error('Erreur lors de la création:', error);
+                console.error('Error creating folder:', error);
                 setIsSubmitting(false);
             }
         }
     };
+
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -426,12 +450,12 @@ export function CreateDocument() {
                                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                 </svg>
-                                                Création en cours...
+                                                Création du dossier...
                                             </>
                                         ) : (
                                             <>
-                                                <Save className="h-4 w-4 mr-2" />
-                                                Créer le document
+                                                <Plus className="h-4 w-4 mr-2" />
+                                                Créer le dossier
                                             </>
                                         )}
                                     </button>
@@ -506,7 +530,7 @@ export function CreateDocument() {
           .animate-fadeIn {
             animation: fadeIn 0.3s ease-out forwards;
           }
-          
+
           @keyframes dropdownAppear {
             0% { opacity: 0; transform: scale(0.95); }
             100% { opacity: 1; transform: scale(1); }
@@ -514,16 +538,16 @@ export function CreateDocument() {
           .animate-dropdown {
             animation: dropdownAppear 0.2s ease-out forwards;
           }
-          
+
           .form-appear {
             animation: formAppear 0.5s ease-out forwards;
           }
-          
+
           @keyframes formAppear {
             0% { opacity: 0; transform: translateY(20px); }
             100% { opacity: 1; transform: translateY(0); }
           }
-          
+
           .form-container {
             transition: opacity 0.4s ease-out, transform 0.4s ease-out;
           }
@@ -622,3 +646,4 @@ export function CreateDocument() {
         </div>
     );
 }
+

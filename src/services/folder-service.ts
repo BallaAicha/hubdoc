@@ -1,6 +1,7 @@
 
 import apiClient from './api-client';
 import {Folder} from "../types";
+import {CreateFolderData} from "../hooks/useCreateFolder.ts";
 
 
 class FolderService {
@@ -15,6 +16,11 @@ class FolderService {
     getSubFolders(parentId: number) {
         return apiClient.get<Folder[]>(`/folders/${parentId}/subfolders`).then(res => res.data);
     }
+
+    createFolder(folder: CreateFolderData): Promise<Folder> {
+        return apiClient.post<Folder>('/folders', folder).then(res => res.data);
+    }
+
 }
 
 export default new FolderService();
