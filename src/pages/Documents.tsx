@@ -42,7 +42,8 @@ export default function Documents() {
     const {data: currentFolder, isLoading: isLoadingFolder} = useFolder(folderIdNum ?? 0);
     const {data: documents, isLoading: isLoadingDocuments} = useDocuments(folderIdNum ?? 0);
     const {data: subFolders, isLoading: isLoadingSubFolders} = useSubFolders(folderIdNum ?? 0);
-    const [selectedItem, setSelectedItem] = useState<Document | Folder | null>(null);
+    // Update the state type to match the expected Document type with all required properties
+    const [selectedItem, setSelectedItem] = useState<Folder | Document | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [showFilters, setShowFilters] = useState(false);
@@ -86,10 +87,6 @@ export default function Documents() {
         else setShowActionMenu(!showActionMenu);
     };
 
-    // const handleCreateSubFolder = () => {
-    //     navigate(`/documents/create?parentId=${folderId || ""}`);
-    //     setShowActionMenu(false);
-    // };
 
     const handleCreateSubFolder = () => {
         navigate(`/documents/create/${folderId}`);
@@ -157,11 +154,11 @@ export default function Documents() {
                 : <ItemList items={filteredItems} {...{handleItemClick,getFileTypeIcon,getFileTypeColor}}/>)
             }
 
-            {isModalOpen && selectedItem && 'parentId' in selectedItem && 'documentIds' in selectedItem && (
+            {isModalOpen && selectedItem && 'parentId' in selectedItem && 'documentIds' in selectedItem && 'subFolderIds' in selectedItem && (
                 <FolderModal {...{isModalOpen, setIsModalOpen, selectedItem, handleViewFolder}}/>
             )}
             {selectedItem && !('subFolderIds' in selectedItem) && (
-                <DocumentDetails selectedItem={selectedItem} showDetails={showDetails} setShowDetails={setShowDetails} />
+                <DocumentDetails selectedItem={selectedItem as any} showDetails={showDetails} setShowDetails={setShowDetails} />
             )}
         </div>
     );

@@ -1,210 +1,184 @@
----
-title: Guide d'Installation
-nextjs:
-  metadata:
-    title: Installation - Documentation Produit
-    description: Guide complet d'installation et de configuration pour démarrer rapidement avec notre solution.
----
+# 🚀 Guide d'Installation Spring Backend
 
-# Guide d'Installation
+## 📋 Aperçu
 
-```jsx
-<div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-lg p-6 my-8 text-white shadow-xl">
-  <h2 className="text-2xl font-bold mb-2">Démarrage Rapide</h2>
-  <p className="opacity-90">Notre documentation vous guide pas à pas pour une installation sans erreur et une mise en route optimale.</p>
-  <div className="mt-4 flex space-x-4">
-    <a href="#prerequis" className="bg-white text-blue-700 hover:bg-blue-50 transition duration-300 px-4 py-2 rounded-md font-medium">Prérequis</a>
-    <a href="#installation" className="bg-transparent hover:bg-blue-500 border border-white transition duration-300 px-4 py-2 rounded-md font-medium">Installation</a>
-  </div>
-</div>
-```
+Ce guide détaille le processus d'installation et de configuration d'un environnement de développement Spring Backend.
 
-## À propos de ce guide
+> ℹ️ **Info:** Suivez attentivement chaque étape pour garantir une installation réussie.
 
-Ce guide détaille le processus d'installation complet de notre solution. Suivez les étapes avec attention pour garantir une configuration optimale de votre environnement.
+## 🛠️ Prérequis
 
----
+### Environnement de développement
 
-```jsx
-<div id="prerequis" className="bg-gray-50 rounded-lg p-6 my-8 border-l-4 border-blue-500">
-  <h2 className="text-xl font-bold text-gray-800 mb-4">Prérequis système</h2>
+| Outil          | Version minimale | Description                           |
+|----------------|------------------|---------------------------------------|
+| JDK            | 17 ou plus      | Java Development Kit                  |
+| Maven          | 3.8.x           | Gestionnaire de dépendances           |
+| IDE            | -               | IntelliJ IDEA ou Eclipse recommandés  |
+| Git            | 2.x             | Système de contrôle de version        |
 
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div className="bg-white p-4 rounded shadow-sm">
-      <h3 className="font-medium text-blue-600">Environnement</h3>
-      <ul className="mt-2 space-y-1 text-gray-600">
-        <li className="flex items-center"><span className="mr-2">✓</span> Node.js 16.0 ou plus récent</li>
-        <li className="flex items-center"><span className="mr-2">✓</span> NPM 7+ ou Yarn 1.22+</li>
-      </ul>
-    </div>
-    <div className="bg-white p-4 rounded shadow-sm">
-      <h3 className="font-medium text-blue-600">Configuration recommandée</h3>
-      <ul className="mt-2 space-y-1 text-gray-600">
-        <li className="flex items-center"><span className="mr-2">✓</span> 4GB RAM minimum</li>
-        <li className="flex items-center"><span className="mr-2">✓</span> 2 cœurs CPU ou plus</li>
-      </ul>
-    </div>
-  </div>
-</div>
-```
+### Configuration système recommandée
 
-<div id="installation"></div>
+| Ressource      | Minimum         | Recommandé      |
+|----------------|-----------------|-----------------|
+| RAM            | 8 GB           | 16 GB           |
+| Processeur     | 2 cœurs        | 4 cœurs         |
+| Espace disque  | 10 GB          | 20 GB           |
 
-## Installation
+## 📥 Installation étape par étape
 
-```jsx
-<div className="steps-container my-8">
-  <div className="step bg-white rounded-lg p-6 shadow-md border border-gray-100 relative mb-8">
-    <div className="step-number absolute -left-4 -top-4 w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">1</div>
-    <h3 className="text-lg font-bold mb-3">Téléchargement des fichiers</h3>
-    <p className="text-gray-600 mb-4">Commencez par cloner le dépôt ou télécharger l'archive depuis notre plateforme.</p>
-```
+### 1. Installation du JDK
 
+#### Windows
 ```bash
-git clone https://github.com/votre-entreprise/votre-projet.git
+# Téléchargez le JDK depuis le site officiel d'Oracle ou utilisez:
+winget install Microsoft.OpenJDK.17
+```
+
+#### macOS
+```bash
+# Avec Homebrew
+brew install openjdk@17
+```
+
+#### Linux
+```bash
+# Ubuntu/Debian
+sudo apt update
+sudo apt install openjdk-17-jdk
+```
+
+### 2. Installation de Maven
+
+#### Windows
+```bash
+# Téléchargez Maven depuis apache.maven.org ou utilisez:
+winget install Apache.Maven
+```
+
+#### macOS
+```bash
+brew install maven
+```
+
+#### Linux
+```bash
+sudo apt install maven
+```
+
+### 3. Configuration du projet
+
+1. Clonez le dépôt :
+```bash
+git clone https://github.com/votre-organisation/votre-projet.git
 cd votre-projet
 ```
 
-```jsx
+2. Configurez les variables d'environnement :
 
-
-  <div className="step bg-white rounded-lg p-6 shadow-md border border-gray-100 relative mb-8">
-    <div className="step-number absolute -left-4 -top-4 w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">2</div>
-    <h3 className="text-lg font-bold mb-3">Installation des dépendances</h3>
-    <p className="text-gray-600 mb-4">Installez toutes les dépendances nécessaires à l'aide de NPM ou Yarn.</p>
+```properties
+# application.properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/db_name
+spring.datasource.username=your_username
+spring.datasource.password=your_password
 ```
+
+3. Installez les dépendances :
+```bash
+mvn clean install
+```
+
+## ▶️ Démarrage du projet
+
+### Lancement en mode développement
 
 ```bash
-# Avec NPM
-npm install
-
-# Avec Yarn
-yarn install
+mvn spring-boot:run
 ```
 
-```jsx
- 
+### Construction du projet
 
-  <div className="step bg-white rounded-lg p-6 shadow-md border border-gray-100 relative">
-    <div className="step-number absolute -left-4 -top-4 w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">3</div>
-    <h3 className="text-lg font-bold mb-3">Configuration</h3>
-    <p className="text-gray-600 mb-4">Configurez l'application en créant et en modifiant le fichier de configuration.</p>
+```bash
+mvn clean package
 ```
 
-```js
-/** @type {import('@votre-entreprise/config').Configuration} */
-export default {
-  environment: 'production',
-  api: {
-    endpoint: 'https://api.exemple.com',
-    version: 'v1',
-  },
-  features: {
-    darkMode: true,
-    analytics: true,
-  },
+### Exécution des tests
+
+```bash
+mvn test
+```
+
+## 🔍 Vérification de l'installation
+
+1. Accédez à l'interface Swagger :
+```
+http://localhost:8080/swagger-ui.html
+```
+
+2. Vérifiez les endpoints de santé :
+```
+http://localhost:8080/actuator/health
+```
+
+## ⚠️ Résolution des problèmes courants
+
+| Problème                           | Solution                                                    |
+|-----------------------------------|-------------------------------------------------------------|
+| Port 8080 déjà utilisé            | Modifiez le port dans `application.properties`              |
+| Erreur de connexion à la BDD      | Vérifiez les credentials et la disponibilité de la BDD     |
+| Erreur de compilation Maven       | Nettoyez le cache Maven : `mvn clean`                      |
+
+## 📚 Configuration avancée
+
+### Configuration de la base de données
+
+```yaml
+# application.yml
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/db_name
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+```
+
+### Configuration de la sécurité
+
+```java
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/public/**").permitAll()
+                .anyRequest().authenticated()
+            );
+        return http.build();
+    }
 }
 ```
 
-```jsx
-    <div className="mt-4 bg-blue-50 rounded p-4 border-l-4 border-blue-400">
-      <span className="text-blue-800 font-medium">Astuce :</span>
-      <span className="text-blue-600"> Vous pouvez personnaliser ces paramètres selon vos besoins spécifiques.</span>
-  
- 
-</div>
-```
+## 🔗 Liens utiles
 
-## Vérification de l'installation
+* [Documentation Spring](https://docs.spring.io/spring-boot/docs/current/reference/html/)
+* [Guides Spring](https://spring.io/guides)
+* [Maven Documentation](https://maven.apache.org/guides/)
 
-```jsx
-<div className="bg-green-50 rounded-lg p-6 my-8 border border-green-200">
-  <h3 className="text-lg font-bold text-green-800 mb-3">Tests de validation</h3>
-  <p className="text-gray-700 mb-4">Exécutez les commandes suivantes pour vérifier que tout est correctement installé :</p>
-```
+## 📞 Support
 
-```bash
-# Démarrer l'application en mode développement
-npm run dev
+Pour toute assistance supplémentaire :
+- 📧 Email: support@example.com
+- 💬 Chat: [Slack Community](https://slack.example.com)
+- 📚 Wiki: [Documentation interne](https://wiki.example.com)
 
-# Exécuter les tests unitaires
-npm run test
-```
+---
 
-```jsx
-  <div className="flex items-start mt-4">
-    <div className="flex-shrink-0 mt-1">
-      <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
-      </svg>
-    </div>
-    <p className="ml-3 text-sm text-gray-600">L'application devrait maintenant être accessible à l'adresse <code className="bg-gray-100 rounded px-1 py-0.5">http://localhost:3000</code></p>
-  </div>
-
-```
-
-## Résolution des problèmes courants
-
-```jsx
-<div className="bg-amber-50 rounded-lg p-6 my-8 border-l-4 border-amber-400">
-  <h3 className="text-lg font-bold text-amber-800 mb-3">Dépannage</h3>
-
-  <div className="space-y-4">
-    <div className="bg-white p-4 rounded shadow-sm">
-      <h4 className="font-medium text-amber-700">Erreurs de dépendances</h4>
-      <p className="text-gray-600 mt-1">Si vous rencontrez des erreurs liées aux dépendances, essayez de supprimer le dossier node_modules et réinstallez :</p>
-      <pre className="bg-gray-50 p-2 rounded mt-2 text-sm overflow-x-auto"><code>rm -rf node_modules && npm install</code></pre>
-    </div>
-
-    <div className="bg-white p-4 rounded shadow-sm">
-      <h4 className="font-medium text-amber-700">Problèmes de ports</h4>
-      <p className="text-gray-600 mt-1">Si le port 3000 est déjà utilisé, vous pouvez spécifier un autre port :</p>
-      <pre className="bg-gray-50 p-2 rounded mt-2 text-sm overflow-x-auto"><code>npm run dev -- --port 3001</code></pre>
-    </div>
-  </div>
-</div>
-```
-
-## Support et ressources
-
-```jsx
-<div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-8">
-  <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 hover:shadow-lg transition duration-300">
-    <h3 className="font-bold text-indigo-600 mb-3">Documentation</h3>
-    <p className="text-gray-600 mb-4">Consultez notre documentation complète pour des informations détaillées sur toutes les fonctionnalités.</p>
-    <a href="/docs" className="text-indigo-600 hover:underline font-medium">Explorer la documentation →</a>
-  </div>
-
-  <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 hover:shadow-lg transition duration-300">
-    <h3 className="font-bold text-indigo-600 mb-3">Communauté</h3>
-    <p className="text-gray-600 mb-4">Rejoignez notre communauté active pour poser des questions et partager vos expériences.</p>
-    <a href="/community" className="text-indigo-600 hover:underline font-medium">Rejoindre la discussion →</a>
-  </div>
-
-  <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 hover:shadow-lg transition duration-300">
-    <h3 className="font-bold text-indigo-600 mb-3">Support Technique</h3>
-    <p className="text-gray-600 mb-4">Notre équipe de support est disponible pour vous aider avec les problèmes techniques.</p>
-    <a href="/support" className="text-indigo-600 hover:underline font-medium">Contacter le support →</a>
-  </div>
-</div>
-```
-
-```jsx
-<div className="bg-gray-50 rounded-lg p-6 my-8 border border-gray-200">
-  <h2 className="text-xl font-bold mb-4">Prochaines étapes</h2>
-  <ul className="space-y-3">
-    <li className="flex items-start">
-      <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-blue-100 text-blue-800 font-medium text-sm mr-3 mt-0.5">1</span>
-      <span className="text-gray-700">Configurez votre environnement de développement</span>
-    </li>
-    <li className="flex items-start">
-      <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-blue-100 text-blue-800 font-medium text-sm mr-3 mt-0.5">2</span>
-      <span className="text-gray-700">Explorez notre tutoriel pour créer votre première application</span>
-    </li>
-    <li className="flex items-start">
-      <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-blue-100 text-blue-800 font-medium text-sm mr-3 mt-0.5">3</span>
-      <span className="text-gray-700">Consultez les exemples de code pour des cas d'utilisation avancés</span>
-    </li>
-  </ul>
-</div>
-```
+> 🔒 **Note de sécurité:**
+> - Ne partagez jamais vos credentials de production
+> - Utilisez des variables d'environnement pour les informations sensibles
+> - Activez toujours HTTPS en production

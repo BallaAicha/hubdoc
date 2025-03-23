@@ -11,7 +11,6 @@ import {
   Rocket,
   ShieldCheck,
   Zap,
-  Search,
   Users,
   MessageSquare,
   HelpCircle,
@@ -20,7 +19,7 @@ import {
   Star,
 } from 'lucide-react';
 import clsx from 'clsx';
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 
 // Enrichissement des guides avec de meilleures descriptions et détails
 const quickStartGuides: FileItem[] = [
@@ -244,35 +243,17 @@ function TestimonialCard({ testimonial }: { testimonial: typeof testimonials[0] 
       </div>
   );
 }
-
-function SearchBar() {
-  return (
-      <div className="relative max-w-lg w-full">
-        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-          <Search className="w-5 h-5 text-neutral-400" />
-        </div>
-        <input
-            type="search"
-            className="block w-full p-3 pl-10 text-sm border border-neutral-200 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-            placeholder="Rechercher dans la documentation..."
-        />
-        <div className="absolute inset-y-0 right-3 flex items-center">
-          <kbd className="px-2 py-1 text-xs font-semibold text-neutral-800 bg-neutral-100 border border-neutral-200 rounded">
-            ⌘K
-          </kbd>
-        </div>
-      </div>
-  );
-}
-
 export function QuickStart() {
   const navigate = useNavigate();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-
+  // Removing unused state variable
+  // If mobile menu functionality is needed later, uncomment:
+  // const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // Remove the unused state or use it in your component
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+      // const scrolled = window.scrollY > 10;
+      // Store for future use if needed
+      // Currently not using the scroll state
     };
 
     window.addEventListener('scroll', handleScroll);
