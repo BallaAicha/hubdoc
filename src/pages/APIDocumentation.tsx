@@ -81,6 +81,16 @@ const apiList: ApiItem[] = [
         version: 'v2.4.0',
         category: 'Transactions'
     },
+
+    {
+        id: 'api6',
+        name: 'Transactions-API test',
+        description: 'Gestion des transactions',
+        icon: CreditCard,
+        status: 'stable',
+        version: 'v2.4.0',
+        category: 'Transactions'
+    },
 ];
 
 // Composant d'animation de chargement
@@ -366,7 +376,7 @@ export function APIDocumentation() {
                                 {categories.map(category => (
                                     <button
                                         key={category}
-                                        onClick={() => setSelectedCategory(category)}
+                                        onClick={() => setSelectedCategory(category || null)}
                                         className={clsx(
                                             'px-2.5 py-1.5 text-xs font-medium rounded-full transition-colors',
                                             selectedCategory === category ? 'bg-primary-100 text-primary-800' : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
@@ -446,7 +456,7 @@ export function APIDocumentation() {
                             {categories.map(category => (
                                 <button
                                     key={category}
-                                    onClick={() => setSelectedCategory(category)}
+                                    onClick={() => setSelectedCategory(category as string)}
                                     className={clsx(
                                         'px-2.5 py-1.5 text-xs font-medium rounded-full transition-colors',
                                         selectedCategory === category ? 'bg-primary-100 text-primary-800' : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
@@ -570,10 +580,10 @@ export function APIDocumentation() {
                                                                             {language}
                                                                         </div>
                                                                         <pre className={className} {...props}>
-                                      <code className={className} {...props}>
-                                        {children}
-                                      </code>
-                                    </pre>
+                                                                          <code className={className} {...props}>
+                                                                            {children}
+                                                                          </code>
+                                                                        </pre>
                                                                     </div>
                                                                 );
                                                             }

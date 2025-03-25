@@ -94,8 +94,9 @@ export default function Documents() {
     };
 
     const handleCreateDocument = () => {
-        navigate(`/documents/${folderId}/create-version`);
+        navigate(`/documents/create-version?folderId=${folderId}`);
         setShowActionMenu(false);
+
     };
 
     const isLoading = isLoadingRootFolders || isLoadingFolder || isLoadingDocuments || isLoadingSubFolders;

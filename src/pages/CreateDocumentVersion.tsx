@@ -1,5 +1,5 @@
-import React, { useState, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, {useState, useRef, useCallback, useEffect} from 'react';
+import {useNavigate, useParams, useSearchParams} from 'react-router-dom';
 import {
     ArrowLeft,
     PlusCircle,
@@ -18,25 +18,41 @@ import {
 } from 'lucide-react';
 import { DocumentStatus } from '../types/documents';
 import clsx from 'clsx';
+import {useCreateDocument} from "../hooks/useCreateDocument.ts";
 
+// Interface mise à jour pour correspondre à votre modèle de document
 interface FormData {
     name: string;
     description: string;
-    versionNumber: string;
+    version: string;
+    fileType: string;
     file: File | null;
     status: DocumentStatus;
+    folderId: number | null;
+    parentDocumentId: number | null;
     tags: string[];
     metadata: Record<string, string>;
 }
 
 export function CreateDocumentVersion() {
     const navigate = useNavigate();
+    const { documentId } = useParams();
+    const [searchParams] = useSearchParams();
+    const folderIdParam = searchParams.get('folderId');
+
+    // Récupérer le folderId depuis les paramètres d'URL (nouvelle méthode selon la correction)
+    const effectiveFolderId = folderIdParam ? parseInt(folderIdParam) : null;
+    const effectiveParentDocId = documentId ? parseInt(documentId) : null;
+
     const [formData, setFormData] = useState<FormData>({
         name: '',
         description: '',
-        versionNumber: '1.0',
+        version: '1.0',
+        fileType: 'pdf',
         file: null,
         status: DocumentStatus.DRAFT,
+        folderId: effectiveFolderId,
+        parentDocumentId: effectiveParentDocId,
         tags: [],
         metadata: {},
     });
@@ -46,6 +62,28 @@ export function CreateDocumentVersion() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const tagInputRef = useRef<HTMLInputElement>(null);
+// Animation d'entrée
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            const formContainer = document.querySelector('.form-container');
+            if (formContainer) {
+                formContainer.classList.add('form-appear');
+                formContainer.classList.remove('opacity-0', 'translate-y-4');
+            }
+        }, 100);
+
+        return () => clearTimeout(timer);
+    }, []);
+    const createDocument = useCreateDocument(() => {
+        document.getElementById('success-message')?.classList.remove('hidden');
+        setTimeout(() => {
+            if (effectiveFolderId) {
+                navigate(`/documents/${effectiveFolderId}`);
+            } else {
+                navigate('/documents');
+            }
+        }, 1200);
+    });
 
     const validateForm = (): boolean => {
         const errors: Partial<Record<keyof FormData, string>> = {};
@@ -54,15 +92,15 @@ export function CreateDocumentVersion() {
             errors.name = 'Le nom du document est requis';
         }
 
-        if (!formData.versionNumber.trim()) {
-            errors.versionNumber = 'Le numéro de version est requis';
-        } else if (!/^\d+(\.\d+)*$/.test(formData.versionNumber)) {
-            errors.versionNumber = 'Format de version invalide (ex: 1.0, 2.3.1)';
+        if (!formData.version.trim()) {
+            errors.version = 'Le numéro de version est requis';
+        } else if (!/^\d+(\.\d+)*$/.test(formData.version)) {
+            errors.version = 'Format de version invalide (ex: 1.0, 2.3.1)';
         }
 
-        if (!formData.file) {
-            errors.file = 'Un fichier est requis';
-        }
+        // if (!formData.file) {
+        //     errors.file = 'Un fichier est requis';
+        // }
 
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
@@ -70,27 +108,40 @@ export function CreateDocumentVersion() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (validateForm()) {
+            setIsSubmitting(true);
+            try {
+                // Création d'un objet avec les attributs nécessaires pour correspondre au modèle
+                const documentData = {
+                    name: formData.name,
+                    description: formData.description,
+                    version: formData.version,
+                    fileType: formData.fileType,
+                    fileSize: formData.file ? formData.file.size : 0,
+                    filePath: formData.file ? `/documents/${formData.file.name}` : '',
+                    status: formData.status,
+                    folderId: formData.folderId,
+                    parentDocumentId: formData.parentDocumentId,
+                    tags: formData.tags,
+                    metadata: formData.metadata
+                };
 
-        if (!validateForm()) return;
-
-        setIsSubmitting(true);
-
-        try {
-            // Simuler un délai d'envoi pour démonstration de l'état de soumission
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            console.log('Form submitted:', formData);
-            navigate('/documents');
-        } catch (error) {
-            console.error('Erreur lors de la soumission:', error);
-        } finally {
-            setIsSubmitting(false);
+                await createDocument.mutateAsync(documentData);
+            } catch (error) {
+                console.error('Error creating document:', error);
+                setIsSubmitting(false);
+            }
         }
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
-            setFormData((prev) => ({ ...prev, file }));
+            setFormData((prev) => ({
+                ...prev,
+                file,
+                fileType: file.type.split('/')[1] || 'pdf'  // Déduire le type de fichier
+            }));
             setFormErrors(prev => ({ ...prev, file: undefined }));
         }
     };
@@ -108,7 +159,12 @@ export function CreateDocumentVersion() {
         e.preventDefault();
         setIsDragging(false);
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-            setFormData((prev) => ({ ...prev, file: e.dataTransfer.files[0] }));
+            const file = e.dataTransfer.files[0];
+            setFormData((prev) => ({
+                ...prev,
+                file,
+                fileType: file.type.split('/')[1] || 'pdf'  // Déduire le type de fichier
+            }));
             setFormErrors(prev => ({ ...prev, file: undefined }));
         }
     }, []);
@@ -210,7 +266,7 @@ export function CreateDocumentVersion() {
                     <div className="bg-white border-b border-slate-200 px-6 py-5">
                         <div className="flex items-center gap-4">
                             <button
-                                onClick={() => navigate('/documents')}
+                                onClick={() => navigate(effectiveFolderId ? `/documents/${effectiveFolderId}` : '/documents')}
                                 className="p-2 rounded-full hover:bg-slate-100 text-slate-500 transition-colors"
                                 aria-label="Retour"
                             >
@@ -277,28 +333,28 @@ export function CreateDocumentVersion() {
                             <div className="space-y-6">
                                 {/* Version Number */}
                                 <div className="space-y-1.5">
-                                    <label htmlFor="versionNumber" className="flex items-center text-sm font-medium text-slate-700">
+                                    <label htmlFor="version" className="flex items-center text-sm font-medium text-slate-700">
                                         <BarChart4 className="w-4 h-4 mr-1.5 text-slate-500" />
                                         Numéro de version <span className="text-primary-500 ml-0.5">*</span>
                                     </label>
                                     <input
                                         type="text"
-                                        id="versionNumber"
-                                        value={formData.versionNumber}
+                                        id="version"
+                                        value={formData.version}
                                         onChange={(e) => {
-                                            setFormData((prev) => ({ ...prev, versionNumber: e.target.value }));
+                                            setFormData((prev) => ({ ...prev, version: e.target.value }));
                                             if (/^\d+(\.\d+)*$/.test(e.target.value)) {
-                                                setFormErrors(prev => ({ ...prev, versionNumber: undefined }));
+                                                setFormErrors(prev => ({ ...prev, version: undefined }));
                                             }
                                         }}
                                         placeholder="Ex: 1.0"
                                         className={clsx(
                                             "w-full px-3.5 py-2.5 bg-white rounded-lg border shadow-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-all",
-                                            formErrors.versionNumber ? "border-red-300" : "border-slate-300"
+                                            formErrors.version ? "border-red-300" : "border-slate-300"
                                         )}
                                     />
-                                    {formErrors.versionNumber && (
-                                        <p className="text-red-500 text-xs mt-1">{formErrors.versionNumber}</p>
+                                    {formErrors.version && (
+                                        <p className="text-red-500 text-xs mt-1">{formErrors.version}</p>
                                     )}
                                 </div>
 
@@ -347,83 +403,6 @@ export function CreateDocumentVersion() {
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-
-                        {/* File Upload Section */}
-                        <div className="space-y-1.5 bg-slate-50 p-6 rounded-lg border border-slate-200">
-                            <label className="flex items-center text-sm font-medium text-slate-700 mb-2">
-                                <FileText className="w-4 h-4 mr-1.5 text-slate-500" />
-                                Document <span className="text-primary-500 ml-0.5">*</span>
-                            </label>
-                            <div
-                                onDragOver={handleDragOver}
-                                onDragLeave={handleDragLeave}
-                                onDrop={handleDrop}
-                                className={clsx(
-                                    "border-2 border-dashed rounded-lg transition-all duration-200",
-                                    isDragging ? "border-primary-500 bg-primary-50" : "border-slate-300 bg-white",
-                                    formData.file ? "border-emerald-500 bg-emerald-50" : "",
-                                    formErrors.file ? "border-red-300" : "",
-                                    "p-6"
-                                )}
-                            >
-                                {!formData.file ? (
-                                    <div className="flex flex-col items-center justify-center py-4">
-                                        <div className="mb-4 bg-white p-3.5 rounded-full shadow-sm border border-slate-200">
-                                            <UploadCloud className="w-6 h-6 text-slate-400" />
-                                        </div>
-                                        <p className="text-sm text-slate-600 text-center mb-2">
-                                            <span className="font-medium">Cliquez pour télécharger</span> ou glissez-déposez
-                                        </p>
-                                        <p className="text-xs text-slate-500 text-center mb-4">
-                                            PDF, DOC, DOCX, XLS, XLSX (max. 10 MB)
-                                        </p>
-                                        <button
-                                            type="button"
-                                            onClick={triggerFileInput}
-                                            className="inline-flex items-center gap-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-4 py-2.5 rounded-lg cursor-pointer transition-colors shadow-sm font-medium"
-                                        >
-                                            <FileText className="w-4 h-4" />
-                                            Sélectionner un fichier
-                                        </button>
-                                        <input
-                                            ref={fileInputRef}
-                                            id="file-upload"
-                                            type="file"
-                                            className="hidden"
-                                            onChange={handleFileChange}
-                                            accept="application/pdf, application/msword, .docx, .xlsx, .xls"
-                                        />
-                                        {formErrors.file && (
-                                            <p className="text-red-500 text-xs mt-3 text-center">{formErrors.file}</p>
-                                        )}
-                                    </div>
-                                ) : (
-                                    <div className="flex justify-between items-center">
-                                        <div className="flex items-center">
-                                            <div className="bg-emerald-100 p-3 rounded-full">
-                                                <Check className="w-5 h-5 text-emerald-600" />
-                                            </div>
-                                            <div className="ml-4">
-                                                <p className="text-slate-800 font-medium truncate max-w-xs sm:max-w-md">
-                                                    {formData.file.name}
-                                                </p>
-                                                <p className="text-xs text-slate-500 mt-1">
-                                                    {formatFileSize(formData.file.size)}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => setFormData(prev => ({ ...prev, file: null }))}
-                                            className="p-2 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-500 hover:text-primary-500 transition-colors"
-                                            aria-label="Supprimer le fichier"
-                                        >
-                                            <X className="w-5 h-5" />
-                                        </button>
-                                    </div>
-                                )}
                             </div>
                         </div>
 
@@ -542,7 +521,7 @@ export function CreateDocumentVersion() {
                         <div className="pt-6 border-t border-slate-200 mt-8 flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-4 space-y-4 space-y-reverse sm:space-y-0">
                             <button
                                 type="button"
-                                onClick={() => navigate('/documents')}
+                                onClick={() => navigate(effectiveFolderId ? `/documents/${effectiveFolderId}` : '/documents')}
                                 className="px-5 py-2.5 border border-slate-300 text-slate-700 font-medium rounded-lg hover:bg-slate-50 transition-colors shadow-sm"
                             >
                                 Annuler
