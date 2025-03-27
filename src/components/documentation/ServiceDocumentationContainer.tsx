@@ -5,7 +5,6 @@ import ServiceHeader from "./container/ServiceHeader.tsx";
 import ServiceClients from "./container/ServiceClients.tsx";
 import ServiceDataSources from './container/ServiceDataSourcesProps.tsx';
 import ServiceInfrastructure from "./container/ServiceInfrastructure.tsx";
-import { Infrastructure } from '../../types/api';
 import ServiceDependencies from "./container/ServiceDependencies.tsx";
 import ServiceEndpoints from "./container/ServiceEndpoints.tsx";
 import ServiceDatabaseSchema from "./container/ServiceDatabaseSchema.tsx";

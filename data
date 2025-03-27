@@ -1,0 +1,133 @@
+{
+  "id": "a1b2c3d4-5678-4321-abcd-ef1234567890",
+  "name": "Authentication Banking Service",
+  "trigramme": "ABB",
+  "description": "Service central d'authentification pour toutes les applications bancaires avec support OAuth2, JWT et MFA",
+  "infrastructure": {
+    "urlInt": "https://int-auth.bankingsolutions.com",
+    "urlUat": "https://uat-auth.bankingsolutions.com",
+    "urlOat": "https://oat-auth.bankingsolutions.com",
+    "urlProd": "https://auth.bankingsolutions.com"
+  },
+  "dataSources": {
+    "rabbitMQ": true,
+    "commonDB": false,
+    "dedicatedDB": true,
+    "s3": false
+  },
+  "clientConsumers": [
+    "MobileBanking",
+    "WebPortal",
+    "ATMInterface",
+    "BranchSystemApp"
+  ],
+  "consumes": [
+    "DirectoryService",
+    "BiometricValidationAPI",
+    "AuditLogger"
+  ],
+  "consumedBy": [
+    "LoanProcessingSystem",
+    "AccountManagementSystem",
+    "CardIssuanceService",
+    "CustomerPortal"
+  ],
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/api/v2/auth/login",
+      "curl": "curl -X POST https://auth.bankingsolutions.com/api/v2/auth/login -H 'Content-Type: application/json' -d '{\"username\":\"customer123\",\"password\":\"securePass\",\"deviceId\":\"MOB-IOS-12345\"}'",
+      "expectedResponse": "{\"accessToken\":\"eyJhbGciOiJS...\",\"refreshToken\":\"eyR2eXAiOi...\",\"expiresIn\":1800,\"userProfile\":{\"id\":\"U98765\",\"role\":\"CUSTOMER\",\"lastLogin\":\"2023-10-17T08:45:23Z\"}}",
+      "description": "Authentification d'un client bancaire et génération des tokens d'accès"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v2/auth/mfa/verify",
+      "curl": "curl -X POST https://auth.bankingsolutions.com/api/v2/auth/mfa/verify -H 'Content-Type: application/json' -H 'Authorization: Bearer eyJhbGciOiJS...' -d '{\"mfaCode\":\"123456\",\"mfaType\":\"SMS\"}'",
+      "expectedResponse": "{\"verified\":true,\"sessionToken\":\"eyJhbGcRTY...\",\"sessionExpiry\":\"2023-10-17T10:45:23Z\"}",
+      "description": "Vérification de l'authentification à deux facteurs"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v2/auth/token/refresh",
+      "curl": "curl -X POST https://auth.bankingsolutions.com/api/v2/auth/token/refresh -H 'Content-Type: application/json' -d '{\"refreshToken\":\"eyR2eXAiOi...\"}'",
+      "expectedResponse": "{\"accessToken\":\"eyJuZXdh...\",\"expiresIn\":1800}",
+      "description": "Renouvellement du token d'accès à l'aide du token de rafraîchissement"
+    }
+  ],
+  "databaseSchema": "banking_auth_schema"
+}
+
+
+
+
+
+
+
+
+
+
+
+------------------------------
+
+{
+  "id": "b2c3d4e5-6789-5432-bcde-f62345678901",
+  "name": "Advanced Evaluation Payment Service",
+  "trigramme": "AEP",
+  "description": "Service de validation et d'analyse des paiements avec détection de fraudes et scoring transactionnel en temps réel",
+  "infrastructure": {
+    "urlInt": "https://int-payment-eval.bankingsolutions.com",
+    "urlUat": "https://uat-payment-eval.bankingsolutions.com",
+    "urlOat": "https://oat-payment-eval.bankingsolutions.com",
+    "urlProd": "https://payment-eval.bankingsolutions.com"
+  },
+  "dataSources": {
+    "rabbitMQ": true,
+    "commonDB": true,
+    "dedicatedDB": true,
+    "s3": true
+  },
+  "clientConsumers": [
+    "PaymentGateway",
+    "CardProcessingSystem",
+    "MerchantPortal",
+    "FraudAnalysisDashboard"
+  ],
+  "consumes": [
+    "TransactionHistoryService",
+    "CustomerRiskProfile",
+    "MerchantDatabase",
+    "GeoLocationService"
+  ],
+  "consumedBy": [
+    "SettlementSystem",
+    "TransactionAuditSystem",
+    "ComplianceReportingService",
+    "CustomerAlertSystem"
+  ],
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/api/v3/payments/evaluate",
+      "curl": "curl -X POST https://payment-eval.bankingsolutions.com/api/v3/payments/evaluate -H 'Content-Type: application/json' -H 'X-API-Key: abcd1234' -d '{\"accountId\":\"ACC98765\",\"amount\":1250.75,\"currency\":\"EUR\",\"merchantId\":\"MER567\",\"deviceFingerprint\":\"DF789012\",\"transactionType\":\"ONLINE\"}'",
+      "expectedResponse": "{\"transactionId\":\"TRX123456\",\"riskScore\":15,\"approvalStatus\":\"APPROVED\",\"verificationNeeded\":false,\"processingTime\":0.153,\"limits\":{\"remaining\":8750.25,\"daily\":10000}}",
+      "description": "Évaluation d'une transaction pour déterminer le risque et approbation"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v3/payments/status/{transactionId}",
+      "curl": "curl -X GET https://payment-eval.bankingsolutions.com/api/v3/payments/status/TRX123456 -H 'X-API-Key: abcd1234'",
+      "expectedResponse": "{\"transactionId\":\"TRX123456\",\"status\":\"CLEARED\",\"processedAt\":\"2023-10-17T14:23:17Z\",\"settlementStatus\":\"PENDING\",\"riskDetails\":{\"flags\":[],\"score\":15}}",
+      "description": "Vérification du statut d'une transaction évaluée précédemment"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v3/fraud/report",
+      "curl": "curl -X POST https://payment-eval.bankingsolutions.com/api/v3/fraud/report -H 'Content-Type: application/json' -H 'X-API-Key: abcd1234' -d '{\"transactionId\":\"TRX123456\",\"reportType\":\"SUSPECTED_FRAUD\",\"details\":\"Unusual location and amount\"}'",
+      "expectedResponse": "{\"reportId\":\"FR789012\",\"status\":\"RECEIVED\",\"estimatedReviewTime\":\"2h\"}",
+      "description": "Signalement d'une transaction potentiellement frauduleuse pour enquête"
+    }
+  ],
+  "databaseSchema": "payment_evaluation_schema"
+}
+
