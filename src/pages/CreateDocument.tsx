@@ -6,17 +6,14 @@ import { HelpPanel } from "../components/folders/HelpPanel";
 import { DocumentTypeSelector } from "../components/folders/DocumentTypeSelector";
 import { DocumentForm } from "../components/folders/DocumentForm";
 import { Footer } from "../components/commons/Footer";
-
 export function CreateDocument() {
     const navigate = useNavigate();
     const { folderId } = useParams();
     const { parentId } = useParams();
     const [searchParams] = useSearchParams();
     const parentIdFromQuery = searchParams.get('parentId');
-
     const effectiveParentId = folderId ? parseInt(folderId) :
         parentIdFromQuery ? parseInt(parentIdFromQuery) : null;
-
     const [formData, setFormData] = useState({
         name: '',
         description: '',
@@ -40,7 +37,6 @@ export function CreateDocument() {
 
         return () => clearTimeout(timer);
     }, []);
-
     const createFolder = useCreateFolder(() => {
         document.getElementById('success-message')?.classList.remove('hidden');
         setTimeout(() => {
@@ -51,7 +47,6 @@ export function CreateDocument() {
             }
         }, 1200);
     });
-
     const validateForm = () => {
         const newErrors: Record<string, string> = {};
         if (!formData.name.trim()) {
@@ -62,7 +57,6 @@ export function CreateDocument() {
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (validateForm()) {
@@ -79,7 +73,6 @@ export function CreateDocument() {
             }
         }
     };
-
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
@@ -87,11 +80,9 @@ export function CreateDocument() {
             setErrors(prev => ({ ...prev, [name]: '' }));
         }
     };
-
     const handleCancel = () => {
         navigate('/documents');
     };
-
     return (
         <div className="min-h-screen bg-slate-50 font-sans">
             <Header onCancel={handleCancel} />
@@ -132,4 +123,3 @@ export function CreateDocument() {
     );
 }
 
-export default CreateDocument;
