@@ -1,7 +1,6 @@
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import apiDocumentationService from "../../services/api-documentation-service.ts";
 import {APIService} from "../../types/api.ts";
-
 export const useUpdateService = () => {
     const queryClient = useQueryClient();
 

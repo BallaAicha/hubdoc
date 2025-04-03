@@ -1,9 +1,6 @@
 import axios from 'axios';
 import { APIService } from '../types/api';
-
-// Définition de la base URL - peut être configuré via des variables d'environnement
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
-
 const apiClient = axios.create({
     baseURL: API_BASE_URL,
     headers: {
@@ -12,24 +9,29 @@ const apiClient = axios.create({
 });
 
 class APIDocumentationService {
-    getAllTrigrammes() {
-        return apiClient.get<string[]>('/trigrammes').then(res => res.data);
+    async getAllTrigrammes() {
+        const res = await apiClient.get<string[]>('/trigrammes');
+        return res.data;
     }
 
-    getServicesByTrigramme(trigramme: string) {
-        return apiClient.get<APIService[]>(`/services/trigramme/${trigramme}`).then(res => res.data);
+    async getServicesByTrigramme(trigramme: string) {
+        const res = await apiClient.get<APIService[]>(`/trigramme/${trigramme}`);
+        return res.data;
     }
 
-    getServiceById(id: string) {
-        return apiClient.get<APIService>(`/services/${id}`).then(res => res.data);
+    async getServiceById(id: string) {
+        const res = await apiClient.get<APIService>(`/services/${id}`);
+        return res.data;
     }
 
-    createService(service: Omit<APIService, 'id'>) {
-        return apiClient.post<APIService>('/services', service).then(res => res.data);
+    async createService(service: Omit<APIService, 'id'>) {
+        const res = await apiClient.post<APIService>('/services', service);
+        return res.data;
     }
 
-    updateService(id: string, service: APIService) {
-        return apiClient.put<APIService>(`/services/${id}`, service).then(res => res.data);
+    async updateService(id: string, service: APIService) {
+        const res = await apiClient.put<APIService>(`/services/${id}`, service);
+        return res.data;
     }
 
     deleteService(id: string) {

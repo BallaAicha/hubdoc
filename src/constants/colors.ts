@@ -1,4 +1,3 @@
-// Palette de couleurs (à placer dans un fichier constants/colors.ts)
 export const colors = {
     primary: {
         50: '#fef2f2',

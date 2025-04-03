@@ -14,19 +14,22 @@ export interface CreateDocumentData {
 }
 
 class DocumentService {
-    getDocumentsByFolder(folderId: number) {
-        return apiClient.get<Document[]>(`/documents/folder/${folderId}`).then(res => res.data);
+    async getDocumentsByFolder(folderId: number) {
+        const res = await apiClient.get<Document[]>(`/documents/folder/${folderId}`);
+        return res.data;
     }
 
     getDocument(id: number) {
         return apiClient.get<Document>(`/documents/${id}`).then(res => res.data);
     }
 
-    getDocumentVersions(id: number) {
-        return apiClient.get<Document[]>(`/documents/${id}/versions`).then(res => res.data);
+    async getDocumentVersions(id: number) {
+        const res = await apiClient.get<Document[]>(`/documents/${id}/versions`);
+        return res.data;
     }
-    createDocument(document: CreateDocumentData): Promise<Document> {
-        return apiClient.post<Document>('/documents', document).then(res => res.data);
+    async createDocument(document: CreateDocumentData): Promise<Document> {
+        const res = await apiClient.post<Document>('/documents', document);
+        return res.data;
     }
 
 }

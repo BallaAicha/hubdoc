@@ -1,8 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-
 import { Folder } from '../types';
 import folderService from "../services/folder-service.ts";
-
 export const useSubFolders = (parentId: number) => {
     return useQuery<Folder[], Error>({
         queryKey: ['subFolders', parentId],

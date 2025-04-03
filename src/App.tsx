@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Home } from './pages/Home';
@@ -12,6 +11,7 @@ import { Login } from './pages/Login';
 import {MarkdownViewer} from "./pages/MarkdownViewer.tsx";
 import {APIDocumentation} from "./pages/APIDocumentation.tsx";
 import Documents from "./pages/Documents.tsx";
+import {ApiServiceFormPage} from "./pages/ApiServiceFormPage.tsx";
 
 function App() {
     return (
@@ -23,6 +23,8 @@ function App() {
                 {/* Configuration des Routes */}
                 <Routes>
                     <Route path="/" element={<Home />} />
+                    <Route path="/forms" element={<ApiServiceFormPage />} />
+
 
                     {/* Routes de documents - ordre important! */}
                     <Route path="/documents/create" element={<CreateDocument />} />

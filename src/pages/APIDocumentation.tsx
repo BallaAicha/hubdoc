@@ -14,7 +14,6 @@ import { useServicesByTrigramme } from "../hooks/apis/useServicesByTrigramme.ts"
 import { useService } from "../hooks/apis/useService.ts";
 import {Footer} from "../components/commons/Footer.tsx";
 
-
 export function APIDocumentation() {
     const [selectedTrigramme, setSelectedTrigramme] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -241,6 +240,7 @@ export function APIDocumentation() {
                                                         Voir les standards API
                                                         <ChevronRight className="ml-1 h-4 w-4" />
                                                     </a>
+
                                                 </div>
                                             </div>
                                         </div>

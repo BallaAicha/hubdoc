@@ -267,38 +267,38 @@ export function QuickStart() {
 
 
 
-        {/* Hero section avec gradient amélioré et animation */}
-        <div className="bg-gradient-to-r from-indigo-900 via-indigo-700 to-indigo-500 text-white relative overflow-hidden">
+        {/* Hero section avec fond blanc selon la charte graphique */}
+        <div className="bg-white text-black relative overflow-hidden">
           {/* Formes décoratives avec animation */}
           <div className="absolute inset-0 overflow-hidden opacity-10">
-            <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-white animate-pulse-slow"></div>
-            <div className="absolute right-10 bottom-10 w-80 h-80 rounded-full bg-white animate-pulse-slow animation-delay-1000"></div>
-            <div className="absolute left-1/3 top-1/4 w-40 h-40 rounded-full bg-white animate-pulse-slow animation-delay-2000"></div>
-            <div className="absolute bottom-32 left-1/4 w-24 h-24 rounded-full bg-white animate-pulse-slow animation-delay-3000"></div>
+            <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-gray-200 animate-pulse-slow"></div>
+            <div className="absolute right-10 bottom-10 w-80 h-80 rounded-full bg-gray-200 animate-pulse-slow animation-delay-1000"></div>
+            <div className="absolute left-1/3 top-1/4 w-40 h-40 rounded-full bg-gray-200 animate-pulse-slow animation-delay-2000"></div>
+            <div className="absolute bottom-32 left-1/4 w-24 h-24 rounded-full bg-gray-200 animate-pulse-slow animation-delay-3000"></div>
           </div>
 
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32 relative z-10">
             <div className="max-w-7xl mx-auto">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-10">
                 <div className="max-w-2xl">
-                  <div className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 text-white mb-6 text-sm font-medium backdrop-blur-sm">
+                  <div className="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 text-black mb-6 text-sm font-medium backdrop-blur-sm">
                     <Rocket className="w-4 h-4 mr-2" />
                     <span className="relative">Plateforme de développement de nouvelle génération</span>
                   </div>
                   <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight tracking-tight">
                     Accélérez votre <br className="hidden md:inline" />
-                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-amber-200 to-yellow-400 font-extrabold">
+                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-yellow-600 font-extrabold">
                     innovation
                   </span>
                   </h1>
-                  <p className="text-xl text-white/90 leading-relaxed max-w-xl mb-8">
+                  <p className="text-xl text-black/80 leading-relaxed max-w-xl mb-8">
                     Notre plateforme documentaire et nos outils optimisés vous permettent de développer plus rapidement, avec une qualité industrielle inégalée.
                   </p>
 
                   <div className="flex flex-wrap gap-4 items-center">
                     <button
                         onClick={() => navigate('/generate-spring-project')}
-                        className="flex items-center gap-3 py-3.5 px-7 bg-white text-indigo-700 font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 group"
+                        className="flex items-center gap-3 py-3.5 px-7 bg-black text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 group"
                     >
                       <Plus className="w-5 h-5" />
                       <span>Générer un projet</span>
@@ -306,7 +306,7 @@ export function QuickStart() {
                     </button>
                     <button
                         onClick={() => navigate('/documents')}
-                        className="flex items-center gap-3 py-3.5 px-7 bg-transparent border border-white/50 hover:bg-white/10 text-white font-medium rounded-lg transition-all duration-300"
+                        className="flex items-center gap-3 py-3.5 px-7 bg-transparent border border-black/50 hover:bg-black/5 text-black font-medium rounded-lg transition-all duration-300"
                     >
                       <Book className="w-5 h-5" />
                       <span>Consulter la doc</span>
@@ -315,8 +315,8 @@ export function QuickStart() {
                 </div>
 
                 <div className="hidden lg:block w-96 h-96 relative">
-                  <div className="absolute inset-0 bg-white/5 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/20">
-                    <div className="absolute top-0 right-0 left-0 h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+                  <div className="absolute inset-0 bg-gray-100 backdrop-blur-xl rounded-2xl overflow-hidden border border-gray-200">
+                    <div className="absolute top-0 right-0 left-0 h-1.5 bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500"></div>
                     <div className="p-8 h-full flex flex-col">
                       <div className="flex items-center mb-6">
                         <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
@@ -324,7 +324,7 @@ export function QuickStart() {
                         <div className="w-3 h-3 rounded-full bg-green-500"></div>
                       </div>
                       <div className="flex-1 overflow-hidden">
-                      <pre className="text-xs text-white/80 font-mono overflow-hidden">
+                      <pre className="text-xs text-white/80 font-mono overflow-hidden bg-black p-4 rounded">
                         <code className="language-java">
 {`@RestController
 @RequestMapping("/api/v1")
@@ -341,8 +341,8 @@ public class ApiController {
                         </code>
                       </pre>
                       </div>
-                      <div className="h-8 bg-indigo-900/50 rounded flex items-center px-3 mt-auto">
-                        <span className="text-xs text-green-300">✓ Prêt pour le déploiement</span>
+                      <div className="h-8 bg-gray-200 rounded flex items-center px-3 mt-auto">
+                        <span className="text-xs text-green-700">✓ Prêt pour le déploiement</span>
                       </div>
                     </div>
                   </div>
@@ -358,7 +358,6 @@ public class ApiController {
             </div>
           </div>
         </div>
-
         {/* Trust section */}
         <div className="bg-white border-b border-neutral-100">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">

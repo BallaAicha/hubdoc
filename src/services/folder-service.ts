@@ -5,20 +5,24 @@ import {CreateFolderData} from "../hooks/useCreateFolder.ts";
 
 
 class FolderService {
-    getRootFolders() {
-        return apiClient.get<Folder[]>('/folders/root').then(res => res.data);
+    async getRootFolders() {
+        const res = await apiClient.get<Folder[]>('/folders/root');
+        return res.data;
     }
 
-    getFolder(id: number) {
-        return apiClient.get<Folder>(`/folders/${id}`).then(res => res.data);
+    async getFolder(id: number) {
+        const res = await apiClient.get<Folder>(`/folders/${id}`);
+        return res.data;
     }
 
-    getSubFolders(parentId: number) {
-        return apiClient.get<Folder[]>(`/folders/${parentId}/subfolders`).then(res => res.data);
+    async getSubFolders(parentId: number) {
+        const res = await apiClient.get<Folder[]>(`/folders/${parentId}/subfolders`);
+        return res.data;
     }
 
-    createFolder(folder: CreateFolderData): Promise<Folder> {
-        return apiClient.post<Folder>('/folders', folder).then(res => res.data);
+    async createFolder(folder: CreateFolderData): Promise<Folder> {
+        const res = await apiClient.post<Folder>('/folders', folder);
+        return res.data;
     }
 
 }
