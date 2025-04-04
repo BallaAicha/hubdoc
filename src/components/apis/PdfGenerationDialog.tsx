@@ -7,7 +7,6 @@ interface PdfGenerationDialogProps {
     serviceId: string;
     onClose: () => void;
 }
-
 export function PdfGenerationDialog({ serviceId, onClose }: PdfGenerationDialogProps) {
     const [isGenerating, setIsGenerating] = useState(false);
     const [error, setError] = useState("");

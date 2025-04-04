@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
@@ -7,7 +6,6 @@ interface ApiServiceFormProps {
     onClose: () => void;
     onSuccess: (serviceId: string) => void;
 }
-
 export function ApiServiceForm({ onClose, onSuccess }: ApiServiceFormProps) {
     const [formData, setFormData] = useState({
         name: "",
@@ -40,7 +38,6 @@ export function ApiServiceForm({ onClose, onSuccess }: ApiServiceFormProps) {
     const [currentStep, setCurrentStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState("");
-
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
 
@@ -57,7 +54,6 @@ export function ApiServiceForm({ onClose, onSuccess }: ApiServiceFormProps) {
             setFormData(prev => ({ ...prev, [name]: value }));
         }
     };
-
     const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, checked } = e.target;
         const [parent, child] = name.split('.');
@@ -70,7 +66,6 @@ export function ApiServiceForm({ onClose, onSuccess }: ApiServiceFormProps) {
             }
         }));
     };
-
     const handleArrayChange = (arrayName: string, index: number, value: string) => {
         setFormData(prev => {
             const newArray = [...prev[arrayName as keyof typeof prev] as string[]];
@@ -78,14 +73,12 @@ export function ApiServiceForm({ onClose, onSuccess }: ApiServiceFormProps) {
             return { ...prev, [arrayName]: newArray };
         });
     };
-
     const addArrayItem = (arrayName: string) => {
         setFormData(prev => {
             const newArray = [...prev[arrayName as keyof typeof prev] as string[], ""];
             return { ...prev, [arrayName]: newArray };
         });
     };
-
     const removeArrayItem = (arrayName: string, index: number) => {
         setFormData(prev => {
             const newArray = [...prev[arrayName as keyof typeof prev] as string[]];
@@ -93,7 +86,6 @@ export function ApiServiceForm({ onClose, onSuccess }: ApiServiceFormProps) {
             return { ...prev, [arrayName]: newArray };
         });
     };
-
     const handleEndpointChange = (index: number, field: string, value: string) => {
         setFormData(prev => {
             const newEndpoints = [...prev.endpoints];
@@ -104,7 +96,6 @@ export function ApiServiceForm({ onClose, onSuccess }: ApiServiceFormProps) {
             return { ...prev, endpoints: newEndpoints };
         });
     };
-
     const addEndpoint = () => {
         setFormData(prev => ({
             ...prev,
@@ -120,7 +111,6 @@ export function ApiServiceForm({ onClose, onSuccess }: ApiServiceFormProps) {
             ]
         }));
     };
-
     const removeEndpoint = (index: number) => {
         setFormData(prev => {
             const newEndpoints = [...prev.endpoints];
@@ -128,7 +118,6 @@ export function ApiServiceForm({ onClose, onSuccess }: ApiServiceFormProps) {
             return { ...prev, endpoints: newEndpoints };
         });
     };
-
     const handleSubmit = async () => {
         setIsSubmitting(true);
         setError("");
