@@ -1,97 +1,10 @@
-Voici mon backend :
+quand je clique sur le bouton visualiser il ouvre une page avec les urls :
+http://localhost:5173/Ocbecf62-b8e4-4a7d-a2b9-424be0ed8cc1
+https://objs3parstd01.fr.world.socgen/documents-test/documents/82f44159-878d-4960-92ea-7a58786f083/service-06cdfbc9-5f4a-436d-bdb8-344bcff73475_v4.0.pdf?X-Amz-Algorithm=AWSA
 
-/documents/{documentId}/download
-
-cet endopoint permet de Handle download or browser view of a document
-
-voici le curl :
-curl -X "GET' 1
-
-*http://localhost:8082/api/documents/2/download?download-false'|
-
-H 'accept: application/hal+json'
-H 'X-EntityId: BF
-
-http://localhost:8082/api/documents/2/download?download-false
+Consigne : il doit ouuvrir carrément le fichier pdf dans le navigateur et pas les urls pour le téléchargement il se passe bien
 
 
-Voici mon service actuel :
-
-class DocumentService {
-
-        async getDocumentsByFolder(folderId: number) {
-        const res = await apiClient.get<Document[]>(`/documents/folder/${folderId}`);
-        return res.data;
-    }
-
-    getDocument(id: number) {
-        return apiClient.get<Document>(`/documents/${id}`).then(res => res.data);
-    }
-
-    async getDocumentVersions(id: number) {
-        const res = await apiClient.get<Document[]>(`/documents/${id}/versions`);
-        return res.data;
-    }
-    async createDocument(documentData: CreateDocumentData): Promise<Document> {
-        const { file, folderId, ...otherData } = documentData;
-
-        if (!folderId) {
-            throw new Error("folderId is required");
-        }
-
-        // Création d'un FormData pour l'envoi du fichier
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('name', otherData.name);
-        formData.append('description', otherData.description);
-        formData.append('version', otherData.version);
-
-        if (otherData.parentDocumentId) {
-            formData.append('parentDocumentId', String(otherData.parentDocumentId));
-        }
-
-        if (otherData.status) {
-            formData.append('status', otherData.status);
-        }
-
-        // Ajout des tags s'ils existent
-        if (otherData.tags && otherData.tags.length > 0) {
-            otherData.tags.forEach(tag => {
-                formData.append('tags', tag);
-            });
-        }
-
-        // Ajout des métadonnées s'ils existent
-        if (otherData.metadata) {
-            Object.entries(otherData.metadata).forEach(([key, value]) => {
-                formData.append(`metadata[${key}]`, value);
-            });
-        }
-
-        // Afficher les données du formulaire pour débogage
-        console.log('Form data being sent:');
-        for (const pair of formData.entries()) {
-            console.log(`${pair[0]}: ${pair[1]}`);
-        }
-
-        const res = await apiClient.post<Document>(
-            `/documents/${folderId}/upload`,
-            formData,
-            {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            }
-        );
-
-        return res.data;
-    }
-}
-
-export default new DocumentService();
-
-
-Voici ma vue actuel ::
 
 import { Dialog, Transition } from "@headlessui/react";
 import { X, Download, Eye, FileText, Share, Plus, History } from "lucide-react";
@@ -149,6 +62,26 @@ export default function DocumentDetails({ showDetails, setShowDetails, selectedI
         }
     };
 
+    // Nouvelle fonction pour visualiser le document
+    const handleViewDocument = () => {
+        if (currentDocument && currentDocument.url) {
+            // Ouvrir l'URL du document directement dans un nouvel onglet
+            window.open(currentDocument.url, '_blank');
+        }
+    };
+
+    // Fonction pour télécharger le document
+    const handleDownloadDocument = () => {
+        if (currentDocument && currentDocument.url) {
+            const link = document.createElement('a');
+            link.href = currentDocument.url;
+            link.download = currentDocument.name || `document-${currentDocument.id}.${currentDocument.fileType || 'pdf'}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    };
+
     const formatFileSize = (bytes: number): string => {
         if (bytes === 0) return '0 Bytes';
         const k = 1024;
@@ -197,7 +130,7 @@ export default function DocumentDetails({ showDetails, setShowDetails, selectedI
                                         </div>
                                     </div>
 
-                                    {/* Sélecteur de versions - Sans sélection par défaut */}
+                                    {/* Sélecteur de versions - Avec sélection par défaut */}
                                     <div className="min-w-[180px]">
                                         <label htmlFor="version-selector" className="block text-sm font-medium text-gray-700 mb-1">
                                             Choisir version
@@ -206,10 +139,9 @@ export default function DocumentDetails({ showDetails, setShowDetails, selectedI
                                             id="version-selector"
                                             className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                             onChange={handleVersionChange}
-                                            defaultValue=""
+                                            value={currentDocument.id}
                                             disabled={isLoadingVersions || documentVersions.length === 0}
                                         >
-                                            <option value="" disabled>Sélectionner une version</option>
                                             {isLoadingVersions ? (
                                                 <option disabled>Chargement...</option>
                                             ) : documentVersions.length === 0 ? (
@@ -296,11 +228,15 @@ export default function DocumentDetails({ showDetails, setShowDetails, selectedI
                                 )}
 
                                 <div className="flex flex-wrap items-center gap-3">
-                                    <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                    <button
+                                        onClick={handleDownloadDocument}
+                                        className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                                         <Download className="h-4 w-4 mr-2"/>
                                         Télécharger
                                     </button>
-                                    <button className="inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                                    <button
+                                        onClick={handleViewDocument}
+                                        className="inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
                                         <Eye className="h-4 w-4 mr-2"/>
                                         Visualiser
                                     </button>
@@ -332,6 +268,3 @@ export default function DocumentDetails({ showDetails, setShowDetails, selectedI
         </Transition>
     );
 }
-
-Consigne :  tu dois gérer la partie frontend pour que quand  je clique sur télécharger tu télécharge le document et quand je clique sur visualiser je l'ouvre dans le navigateur
-tu dois créer le hook et le service correspondant
