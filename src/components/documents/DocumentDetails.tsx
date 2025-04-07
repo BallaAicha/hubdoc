@@ -55,11 +55,23 @@ export default function DocumentDetails({ showDetails, setShowDetails, selectedI
     };
 
 
-    const handleView = () => {
-        if (currentDocument) {
-            viewDocument(currentDocument.id);
+    // const handleView = () => {
+    //     if (currentDocument) {
+    //         viewDocument(currentDocument.id);
+    //     }
+    // };
+
+    const handleView = async () => {
+        if (!currentDocument) return;
+
+        try {
+            const url = await documentService.downloadOrViewDocument(currentDocument.id, false);
+            window.open(url, '_blank'); // Cela ouvre directement le PDF dans le navigateur
+        } catch (error) {
+            console.error("Erreur ouverture document", error);
         }
     };
+
     // Changement de version sélectionnée
     const handleVersionChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedVersionId = parseInt(event.target.value);

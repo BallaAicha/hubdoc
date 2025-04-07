@@ -135,42 +135,29 @@ class DocumentService {
     //     }
     // }
 
+    // DocumentService.ts
     async downloadOrViewDocument(documentId: number, download: boolean = true): Promise<string> {
         try {
-            const response = await apiClient.get<Blob>(
-                `/documents/${documentId}/download?download=${download}`,
-                {
-                    responseType: 'blob',
-                    headers: {
-                        'X-EntityId': 'BF',
-                        'accept': download ? 'application/hal+json' : 'application/pdf' // Spécifier PDF pour la visualisation
-                    }
-                }
-            );
-
-            // Créer une URL Blob pour le fichier avec le bon type MIME
-            let contentType = 'application/octet-stream'; // Type par défaut
-
-            // Essayer de déterminer le type de contenu à partir des en-têtes de réponse
-            const contentTypeHeader = response.headers['content-type'];
-            if (contentTypeHeader) {
-                contentType = contentTypeHeader;
-            } else {
-                // Si le type n'est pas fourni, essayer de le déduire du nom de fichier
-                const contentDisposition = response.headers['content-disposition'];
-                if (contentDisposition && contentDisposition.includes('.pdf')) {
-                    contentType = 'application/pdf';
-                }
-            }
-
-            const blob = new Blob([response.data], { type: contentType });
-            const url = window.URL.createObjectURL(blob);
-
             if (download) {
-                // Pour télécharger, créer un lien et cliquer dessus
+                const response = await apiClient.get<Blob>(
+                    `/documents/${documentId}/download?download=true`,
+                    {
+                        responseType: 'blob',
+                        headers: {
+                            'X-EntityId': 'BF',
+                            'accept': 'application/octet-stream'
+                        }
+                    }
+                );
+
+                // Créer un Blob à partir des données
+                const blob = new Blob([response.data]);
+                const url = window.URL.createObjectURL(blob);
+
+                // Télécharger
                 const a = document.createElement('a');
                 a.href = url;
-                // Récupérer le nom du fichier depuis l'en-tête de la réponse si disponible
+
                 const contentDisposition = response.headers['content-disposition'];
                 let filename = 'document';
 
@@ -184,10 +171,21 @@ class DocumentService {
                 a.download = filename;
                 a.click();
                 window.URL.revokeObjectURL(url);
+
                 return '';
             } else {
-                // Pour visualiser, retourner l'URL
-                return url;
+                // Demander une URL directe depuis le backend
+                const response = await apiClient.get<string>(
+                    `/documents/${documentId}/download?download=false`,
+                    {
+                        responseType: 'text',
+                        headers: {
+                            'X-EntityId': 'BF'
+                        }
+                    }
+                );
+                // réponse directe du backend
+                return response.data;
             }
         } catch (error) {
             console.error('Erreur lors du téléchargement/visualisation du document:', error);
