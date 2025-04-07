@@ -1,40 +1,3 @@
-// import { Document } from '../types';
-// import apiClient from './api-client';
-// export interface CreateDocumentData {
-//     fileSize: number;
-//     filePath: string;
-//     name: string;
-//     description: string;
-//     version?: string;
-//     fileType?: string;
-//     folderId?: number | null;
-//     parentDocumentId?: number | null;
-//     tags?: string[];
-//     metadata?: Record<string, string>;
-// }
-//
-// class DocumentService {
-//     async getDocumentsByFolder(folderId: number) {
-//         const res = await apiClient.get<Document[]>(`/documents/folder/${folderId}`);
-//         return res.data;
-//     }
-//
-//     getDocument(id: number) {
-//         return apiClient.get<Document>(`/documents/${id}`).then(res => res.data);
-//     }
-//
-//     async getDocumentVersions(id: number) {
-//         const res = await apiClient.get<Document[]>(`/documents/${id}/versions`);
-//         return res.data;
-//     }
-//     async createDocument(document: CreateDocumentData): Promise<Document> {
-//         const res = await apiClient.post<Document>('/documents', document);
-//         return res.data;
-//     }
-//
-// }
-//
-// export default new DocumentService();
 import { Document } from '../types';
 import apiClient from './api-client';
 
@@ -52,6 +15,19 @@ export interface CreateDocumentData {
 
 class DocumentService {
 
+        async getDocumentsByFolder(folderId: number) {
+        const res = await apiClient.get<Document[]>(`/documents/folder/${folderId}`);
+        return res.data;
+    }
+
+    getDocument(id: number) {
+        return apiClient.get<Document>(`/documents/${id}`).then(res => res.data);
+    }
+
+    async getDocumentVersions(id: number) {
+        const res = await apiClient.get<Document[]>(`/documents/${id}/versions`);
+        return res.data;
+    }
     async createDocument(documentData: CreateDocumentData): Promise<Document> {
         const { file, folderId, ...otherData } = documentData;
 
@@ -106,6 +82,59 @@ class DocumentService {
 
         return res.data;
     }
+
+    /**
+     * Télécharge ou visualise un document selon le paramètre download
+     * @param documentId ID du document
+     * @param download true pour télécharger, false pour visualiser dans le navigateur
+     * @returns Une URL Blob pour accéder au document
+     */
+    async downloadOrViewDocument(documentId: number, download: boolean = true): Promise<string> {
+        try {
+            const response = await apiClient.get<Blob>(
+                `/documents/${documentId}/download?download=${download}`,
+                {
+                    responseType: 'blob',
+                    headers: {
+                        'X-EntityId': 'BF',
+                        'accept': 'application/hal+json'
+                    }
+                }
+            );
+
+            // Créer une URL Blob pour le fichier
+            const blob = new Blob([response.data]);
+            const url = window.URL.createObjectURL(blob);
+
+            if (download) {
+                // Pour télécharger, créer un lien et cliquer dessus
+                const a = document.createElement('a');
+                a.href = url;
+                // Récupérer le nom du fichier depuis l'en-tête de la réponse si disponible
+                const contentDisposition = response.headers['content-disposition'];
+                let filename = 'document';
+
+                if (contentDisposition) {
+                    const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                    if (filenameMatch && filenameMatch[1]) {
+                        filename = filenameMatch[1].replace(/['"]/g, '');
+                    }
+                }
+
+                a.download = filename;
+                a.click();
+                window.URL.revokeObjectURL(url);
+                return '';
+            } else {
+                // Pour visualiser, retourner l'URL
+                return url;
+            }
+        } catch (error) {
+            console.error('Erreur lors du téléchargement/visualisation du document:', error);
+            throw error;
+        }
+    }
+
 }
 
 export default new DocumentService();
