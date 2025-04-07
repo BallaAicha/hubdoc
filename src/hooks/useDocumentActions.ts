@@ -71,6 +71,48 @@ export function useDocumentActions() {
         }
     };
 
+    // const viewDocument = async (documentId: number) => {
+    //     setIsLoading(true);
+    //     setError(null);
+    //     setViewUrl(null);
+    //
+    //     try {
+    //         const url = await documentService.downloadOrViewDocument(documentId, false);
+    //         setViewUrl(url);
+    //
+    //         // Au lieu d'ouvrir simplement l'URL, créer un élément iframe ou embed pour afficher le PDF directement
+    //         // Ou si l'URL pointe vers le contenu binaire du PDF, utiliser un blob URL
+    //         if (url) {
+    //             // Option 1: Si l'URL est une URL de contenu PDF directe
+    //             window.open(url, '_blank');
+    //
+    //             // Option 2: Si vous avez besoin de forcer l'affichage plutôt que le téléchargement
+    //             // Créer un nouvel onglet avec un viewer PDF intégré
+    //             /*
+    //             const newWindow = window.open('', '_blank');
+    //             if (newWindow) {
+    //                 newWindow.document.write(`
+    //                     <html>
+    //                         <head>
+    //                             <title>Visualisation de document</title>
+    //                             <style>body, html, embed {margin: 0; padding: 0; height: 100%; width: 100%;}</style>
+    //                         </head>
+    //                         <body>
+    //                             <embed src="${url}" type="application/pdf" width="100%" height="100%">
+    //                         </body>
+    //                     </html>
+    //                 `);
+    //                 newWindow.document.close();
+    //             }
+    //             */
+    //         }
+    //     } catch (err) {
+    //         setError("Erreur lors de la visualisation du document");
+    //         console.error(err);
+    //     } finally {
+    //         setIsLoading(false);
+    //     }
+    // };
     const viewDocument = async (documentId: number) => {
         setIsLoading(true);
         setError(null);
@@ -80,31 +122,26 @@ export function useDocumentActions() {
             const url = await documentService.downloadOrViewDocument(documentId, false);
             setViewUrl(url);
 
-            // Au lieu d'ouvrir simplement l'URL, créer un élément iframe ou embed pour afficher le PDF directement
-            // Ou si l'URL pointe vers le contenu binaire du PDF, utiliser un blob URL
-            if (url) {
-                // Option 1: Si l'URL est une URL de contenu PDF directe
-                window.open(url, '_blank');
-
-                // Option 2: Si vous avez besoin de forcer l'affichage plutôt que le téléchargement
-                // Créer un nouvel onglet avec un viewer PDF intégré
-                /*
-                const newWindow = window.open('', '_blank');
-                if (newWindow) {
-                    newWindow.document.write(`
-                        <html>
-                            <head>
-                                <title>Visualisation de document</title>
-                                <style>body, html, embed {margin: 0; padding: 0; height: 100%; width: 100%;}</style>
-                            </head>
-                            <body>
-                                <embed src="${url}" type="application/pdf" width="100%" height="100%">
-                            </body>
-                        </html>
-                    `);
-                    newWindow.document.close();
-                }
-                */
+            // Ouvrir le PDF directement dans un nouvel onglet
+            const newWindow = window.open('', '_blank');
+            if (newWindow) {
+                newWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Visualisation du document</title>
+                        <style>
+                            body, html { margin: 0; padding: 0; height: 100%; }
+                            embed { width: 100%; height: 100%; }
+                        </style>
+                    </head>
+                    <body>
+                        <embed src="${url}" type="application/pdf" width="100%" height="100%">
+                    </body>
+                </html>
+            `);
+            } else {
+                // Si l'ouverture d'une nouvelle fenêtre est bloquée, essayer une approche différente
+                setError("Impossible d'ouvrir le document dans un nouvel onglet. Vérifiez si les popups sont bloqués.");
             }
         } catch (err) {
             setError("Erreur lors de la visualisation du document");
