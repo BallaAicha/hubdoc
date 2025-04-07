@@ -118,12 +118,37 @@ export function ApiServiceForm({ onClose, onSuccess }: ApiServiceFormProps) {
             return { ...prev, endpoints: newEndpoints };
         });
     };
+    // const handleSubmit = async () => {
+    //     setIsSubmitting(true);
+    //     setError("");
+    //
+    //     try {
+    //         const response = await axios.post('http://localhost:8080/api/apis', formData);
+    //         if (response.data && response.data.id) {
+    //             onSuccess(response.data.id);
+    //         } else {
+    //             setError("La réponse du serveur ne contient pas l'ID du service");
+    //         }
+    //     } catch (err) {
+    //         setError("Une erreur s'est produite lors de la création du service");
+    //         console.error(err);
+    //     } finally {
+    //         setIsSubmitting(false);
+    //     }
+    // };
+
     const handleSubmit = async () => {
         setIsSubmitting(true);
         setError("");
 
         try {
-            const response = await axios.post('http://localhost:8080/api/', formData);
+            const response = await axios.post('http://localhost:8080/api/apis', formData, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-EntityId': 'BF'
+                }
+            });
+
             if (response.data && response.data.id) {
                 onSuccess(response.data.id);
             } else {
