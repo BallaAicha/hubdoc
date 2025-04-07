@@ -89,51 +89,7 @@ class DocumentService {
      * @param download true pour télécharger, false pour visualiser dans le navigateur
      * @returns Une URL Blob pour accéder au document
      */
-    // async downloadOrViewDocument(documentId: number, download: boolean = true): Promise<string> {
-    //     try {
-    //         const response = await apiClient.get<Blob>(
-    //             `/documents/${documentId}/download?download=${download}`,
-    //             {
-    //                 responseType: 'blob',
-    //                 headers: {
-    //                     'X-EntityId': 'BF',
-    //                     'accept': 'application/hal+json'
-    //                 }
-    //             }
-    //         );
-    //
-    //         // Créer une URL Blob pour le fichier
-    //         const blob = new Blob([response.data]);
-    //         const url = window.URL.createObjectURL(blob);
-    //
-    //         if (download) {
-    //             // Pour télécharger, créer un lien et cliquer dessus
-    //             const a = document.createElement('a');
-    //             a.href = url;
-    //             // Récupérer le nom du fichier depuis l'en-tête de la réponse si disponible
-    //             const contentDisposition = response.headers['content-disposition'];
-    //             let filename = 'document';
-    //
-    //             if (contentDisposition) {
-    //                 const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-    //                 if (filenameMatch && filenameMatch[1]) {
-    //                     filename = filenameMatch[1].replace(/['"]/g, '');
-    //                 }
-    //             }
-    //
-    //             a.download = filename;
-    //             a.click();
-    //             window.URL.revokeObjectURL(url);
-    //             return '';
-    //         } else {
-    //             // Pour visualiser, retourner l'URL
-    //             return url;
-    //         }
-    //     } catch (error) {
-    //         console.error('Erreur lors du téléchargement/visualisation du document:', error);
-    //         throw error;
-    //     }
-    // }
+
 
     // DocumentService.ts
     async downloadOrViewDocument(documentId: number, download: boolean = true): Promise<string> {
@@ -192,6 +148,15 @@ class DocumentService {
             throw error;
         }
     }
+
+    async fetchLatestDocumentVersions(): Promise<Document[]> {
+        const response = await apiClient.get<Document[]>('/documents/latest-versions', {
+            headers: {'X-EntityId': 'BF'},
+        });
+        return response.data;
+    }
+
+
 
 }
 
