@@ -11,6 +11,14 @@ export function ApiServiceForm({ onClose, onSuccess }: ApiServiceFormProps) {
         name: "",
         trigramme: "",
         description: "",
+        bridgeCommunication: false,
+        criticality: "Faible", // Faible | Moyenne | Haute | Critique
+        poCoedev: "",
+        techlead: "",
+        java17Migrated: false,
+        sonarized: false,
+        sonarReportUrl: "",
+        version: "",
         infrastructure: {
             urlInt: "",
             urlUat: "",
@@ -34,6 +42,7 @@ export function ApiServiceForm({ onClose, onSuccess }: ApiServiceFormProps) {
             description: ""
         }],
         databaseSchema: ""
+
     });
     const [currentStep, setCurrentStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -118,31 +127,13 @@ export function ApiServiceForm({ onClose, onSuccess }: ApiServiceFormProps) {
             return { ...prev, endpoints: newEndpoints };
         });
     };
-    // const handleSubmit = async () => {
-    //     setIsSubmitting(true);
-    //     setError("");
-    //
-    //     try {
-    //         const response = await axios.post('http://localhost:8080/api/apis', formData);
-    //         if (response.data && response.data.id) {
-    //             onSuccess(response.data.id);
-    //         } else {
-    //             setError("La réponse du serveur ne contient pas l'ID du service");
-    //         }
-    //     } catch (err) {
-    //         setError("Une erreur s'est produite lors de la création du service");
-    //         console.error(err);
-    //     } finally {
-    //         setIsSubmitting(false);
-    //     }
-    // };
 
     const handleSubmit = async () => {
         setIsSubmitting(true);
         setError("");
 
         try {
-            const response = await axios.post('http://localhost:8080/api/apis', formData, {
+            const response = await axios.post('http://localhost:8080/api/', formData, {
                 headers: {
                     'Content-Type': 'application/json',
                     'X-EntityId': 'BF'
@@ -226,6 +217,105 @@ export function ApiServiceForm({ onClose, onSuccess }: ApiServiceFormProps) {
                                         className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-primary-500 focus:border-primary-500"
                                         rows={3}
                                         required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        id="bridgeCommunication"
+                                        name="bridgeCommunication"
+                                        checked={formData.bridgeCommunication}
+                                        onChange={(e)=>setFormData({...formData, bridgeCommunication:e.target.checked})}
+                                        className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded"
+                                    />
+                                    <label htmlFor="bridgeCommunication" className="ml-2 block text-sm text-neutral-700">Communication bridge</label>
+                                </div>
+                                <div className="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        id="java17Migrated"
+                                        name="java17Migrated"
+                                        checked={formData.java17Migrated}
+                                        onChange={(e)=>setFormData({...formData, java17Migrated:e.target.checked})}
+                                        className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded"
+                                    />
+                                    <label htmlFor="java17Migrated" className="ml-2 block text-sm text-neutral-700">Migré Java 17</label>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                <div className="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        id="sonarized"
+                                        name="sonarized"
+                                        checked={formData.sonarized}
+                                        onChange={(e)=>setFormData({...formData, sonarized:e.target.checked})}
+                                        className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded"
+                                    />
+                                    <label htmlFor="sonarized" className="ml-2 block text-sm text-neutral-700">Analysé par Sonar</label>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-neutral-700 mb-1">URL Rapport Sonar</label>
+                                    <input
+                                        type="text"
+                                        name="sonarReportUrl"
+                                        value={formData.sonarReportUrl}
+                                        onChange={handleChange}
+                                        className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-primary-500 focus:border-primary-500"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid md:grid-cols-2 gap-4 mt-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-neutral-700 mb-1">Criticité</label>
+                                    <select
+                                        name="criticality"
+                                        value={formData.criticality}
+                                        onChange={handleChange}
+                                        className="w-full px-3 py-2 border border-neutral-300 rounded-lg"
+                                    >
+                                        <option value="Faible">Faible</option>
+                                        <option value="Moyenne">Moyenne</option>
+                                        <option value="Haute">Haute</option>
+                                        <option value="Critique">Critique</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-neutral-700 mb-1">Version du service</label>
+                                    <input
+                                        type="text"
+                                        name="version"
+                                        value={formData.version}
+                                        onChange={handleChange}
+                                        className="w-full px-3 py-2 border border-neutral-300 rounded-lg"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid md:grid-cols-2 gap-4 mt-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-neutral-700 mb-1">PO Coedev</label>
+                                    <input
+                                        type="text"
+                                        name="poCoedev"
+                                        value={formData.poCoedev}
+                                        onChange={handleChange}
+                                        className="w-full px-3 py-2 border border-neutral-300 rounded-lg"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-neutral-700 mb-1">Techlead</label>
+                                    <input
+                                        type="text"
+                                        name="techlead"
+                                        value={formData.techlead}
+                                        onChange={handleChange}
+                                        className="w-full px-3 py-2 border border-neutral-300 rounded-lg"
                                     />
                                 </div>
                             </div>

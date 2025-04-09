@@ -131,7 +131,7 @@ export function ServiceDocumentation({ service }: ServiceDocumentationProps) {
                 <div className="bg-neutral-900 rounded-lg p-4">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-xs text-neutral-400">Example Request</span>
-                    <button 
+                    <button
                       onClick={() => navigator.clipboard.writeText(endpoint.curl)}
                       className="text-xs text-neutral-400 hover:text-neutral-300"
                     >
@@ -161,9 +161,9 @@ export function ServiceDocumentation({ service }: ServiceDocumentationProps) {
         <div>
           <h2 className="text-xl font-semibold text-neutral-800 mb-4">Database Schema</h2>
           <div className="bg-white rounded-lg border border-neutral-200 p-6">
-            <img 
-              src={service.databaseSchema} 
-              alt="Database Schema" 
+            <img
+              src={service.databaseSchema}
+              alt="Database Schema"
               className="max-w-full h-auto"
             />
           </div>

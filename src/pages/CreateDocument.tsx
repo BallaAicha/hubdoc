@@ -45,7 +45,7 @@ export function CreateDocument() {
             } else {
                 navigate('/documents');
             }
-        }, 1200);
+        }, 100);
     });
     const validateForm = () => {
         const newErrors: Record<string, string> = {};

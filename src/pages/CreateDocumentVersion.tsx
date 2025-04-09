@@ -198,9 +198,10 @@ export function CreateDocumentVersion() {
             if (effectiveFolderId) {
                 navigate(`/documents/${effectiveFolderId}`);
             } else {
-                navigate('/documents');
+                // navigate('/documents');
+                navigate(`/documents/${effectiveFolderId}`);
             }
-        }, 1200);
+        }, 100);
     });
 
     const validateForm = (): boolean => {

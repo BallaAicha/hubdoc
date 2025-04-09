@@ -1,71 +1,6 @@
-// import React from 'react';
-// import clsx from 'clsx';
-// import { motion } from 'framer-motion';
-// import { APIService } from '../../types/api';
-//
-// interface TrigrammeGridProps {
-//     trigrammes: string[];
-//     selectedTrigramme: string | null;
-//     setSelectedTrigramme: (trigramme: string) => void;
-//     mockServices: APIService[];
-// }
-//
-// const TrigrammeGrid: React.FC<TrigrammeGridProps> = ({
-//                                                          trigrammes,
-//                                                          selectedTrigramme,
-//                                                          setSelectedTrigramme,
-//                                                          mockServices
-//                                                      }) => {
-//     return (
-//         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-//             {trigrammes.map((trigramme, index) => (
-//                 <motion.button
-//                     key={trigramme}
-//                     onClick={() => setSelectedTrigramme(trigramme)}
-//                     className={clsx(
-//                         'p-6 rounded-xl border transition-all text-left transform',
-//                         selectedTrigramme === trigramme
-//                             ? 'bg-primary-50 border-primary-200 ring-2 ring-primary-500 ring-opacity-50'
-//                             : 'bg-white border-neutral-200 hover:border-primary-200 hover:shadow-lg'
-//                     )}
-//                     initial={{ opacity: 0, y: 20 }}
-//                     animate={{ opacity: 1, y: 0 }}
-//                     transition={{
-//                         duration: 0.5,
-//                         delay: index * 0.1,
-//                         type: "spring",
-//                         stiffness: 100
-//                     }}
-//                     whileHover={{ scale: 1.03 }}
-//                     whileTap={{ scale: 0.98 }}
-//                 >
-//                     <div className="flex justify-between items-start">
-//                         <div>
-//                             <h2 className="text-2xl font-bold text-neutral-900">{trigramme}</h2>
-//                             <p className="text-neutral-500 mt-2">
-//                                 {mockServices.filter(s => s.trigramme === trigramme).length} services available
-//                             </p>
-//                         </div>
-//                         <div
-//                             className={clsx(
-//                                 'w-10 h-10 rounded-full flex items-center justify-center',
-//                                 selectedTrigramme === trigramme ? 'bg-primary-500' : 'bg-neutral-200'
-//                             )}
-//                         >
-//                             <span className="text-lg font-bold text-white">
-//                                 {mockServices.filter(s => s.trigramme === trigramme).length}
-//                             </span>
-//                         </div>
-//                     </div>
-//                 </motion.button>
-//             ))}
-//         </div>
-//     );
-// };
-//
-// export default TrigrammeGrid;
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Box, ArrowRight } from 'lucide-react';
 
 interface TrigrammeGridProps {
     trigrammes: string[];
@@ -98,12 +33,11 @@ export function TrigrammeGrid({
 
     if (isLoading) {
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[1, 2, 3, 4, 5, 6].map(i => (
-                    <div
-                        key={i}
-                        className="h-32 bg-neutral-100 rounded-lg animate-pulse"
-                    ></div>
+                    <div key={i} className="animate-pulse">
+                        <div className="h-40 bg-neutral-100 rounded-2xl"></div>
+                    </div>
                 ))}
             </div>
         );
@@ -111,7 +45,7 @@ export function TrigrammeGrid({
 
     return (
         <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
             variants={container}
             initial="hidden"
             animate="show"
@@ -120,14 +54,53 @@ export function TrigrammeGrid({
                 <motion.div key={trigramme} variants={item}>
                     <button
                         onClick={() => setSelectedTrigramme(trigramme)}
-                        className={`w-full p-6 rounded-lg border text-left transition-all duration-300 ${
+                        className={`group w-full h-40 p-6 rounded-2xl border-2 text-left transition-all duration-300 relative overflow-hidden ${
                             selectedTrigramme === trigramme
-                                ? 'border-primary-500 bg-primary-50 shadow-md'
-                                : 'border-neutral-200 bg-white hover:bg-neutral-50 hover:border-neutral-300'
+                                ? 'border-primary-500 bg-primary-50'
+                                : 'border-neutral-200 bg-white hover:border-primary-300 hover:shadow-lg'
                         }`}
                     >
-                        <h3 className="text-xl font-semibold mb-2 text-neutral-900">{trigramme}</h3>
-                        <p className="text-sm text-neutral-500">Click to view {trigramme} services</p>
+                        <div className="relative z-10">
+                            <div className="flex items-center space-x-3 mb-4">
+                                <div className={`p-2 rounded-lg ${
+                                    selectedTrigramme === trigramme
+                                        ? 'bg-primary-100'
+                                        : 'bg-neutral-100 group-hover:bg-primary-50'
+                                } transition-colors`}>
+                                    <Box className={`w-6 h-6 ${
+                                        selectedTrigramme === trigramme
+                                            ? 'text-primary-600'
+                                            : 'text-neutral-600 group-hover:text-primary-600'
+                                    } transition-colors`} />
+                                </div>
+                                <h3 className={`text-2xl font-bold ${
+                                    selectedTrigramme === trigramme
+                                        ? 'text-primary-700'
+                                        : 'text-neutral-800 group-hover:text-primary-700'
+                                } transition-colors`}>
+                                    {trigramme}
+                                </h3>
+                            </div>
+
+                            <p className="text-sm text-neutral-600 mb-4">
+                                Explorez les services {trigramme}
+                            </p>
+
+                            <div className={`inline-flex items-center text-sm font-medium ${
+                                selectedTrigramme === trigramme
+                                    ? 'text-primary-600'
+                                    : 'text-neutral-600 group-hover:text-primary-600'
+                            } transition-colors`}>
+                                Voir les services
+                                <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+                            </div>
+                        </div>
+
+                        <div className={`absolute inset-0 bg-gradient-to-br ${
+                            selectedTrigramme === trigramme
+                                ? 'from-primary-50/50 to-primary-100/50'
+                                : 'from-neutral-50/0 to-neutral-100/0 group-hover:from-primary-50/30 group-hover:to-primary-100/30'
+                        } transition-all duration-500`} />
                     </button>
                 </motion.div>
             ))}
