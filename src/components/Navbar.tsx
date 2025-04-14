@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Files, Home, Rocket, Settings, Menu, X, User, LogOut, ChevronDown, Bell, Search } from 'lucide-react';
+import {Files, Home, Rocket, Settings, Menu, X, User, LogOut, ChevronDown, Bell, Search, Code} from 'lucide-react';
 import clsx from 'clsx';
 
 export function Navbar() {
@@ -38,9 +38,10 @@ export function Navbar() {
   const links = [
     { to: "/", icon: <Home className="h-[18px] w-[18px]" />, label: "Accueil" },
     { to: "/quickstart", icon: <Rocket className="h-[18px] w-[18px]" />, label: "Démarrage rapide" },
-    { to: "/documents", icon: <Files className="h-[18px] w-[18px]" />, label: "Documents" },
-    { to: "/settings", icon: <Settings className="h-[18px] w-[18px]" />, label: "Paramètres" }
+    { to: "/guide/nos-apis", icon: <Code className="h-[18px] w-[18px]" />, label: "APIs" },
+    { to: "/documents", icon: <Files className="h-[18px] w-[18px]" />, label: "Documents" }
   ];
+
 
   return (
       <div className={clsx(

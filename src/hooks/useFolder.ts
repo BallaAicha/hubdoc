@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import folderService from '../services/folder-service';
 import { Folder } from '../types';
-export const useFolder = (id: number) => {
+export const useFolder = (id: number | null) => {
     return useQuery<Folder, Error>({
         queryKey: ['folder', id],
         queryFn: () => folderService.getFolder(id),
