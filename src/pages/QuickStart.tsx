@@ -9,8 +9,6 @@ import {
   ArrowRight,
   ChevronRight,
   Rocket,
-  ShieldCheck,
-  Zap,
   Users,
   MessageSquare,
   HelpCircle,
@@ -20,6 +18,8 @@ import {
 } from 'lucide-react';
 import clsx from 'clsx';
 import React, { useEffect } from "react";
+import {useServicesByTrigramme} from "../hooks/apis/useServicesByTrigramme.ts";
+import {CardAbb} from "../components/CardAbb.tsx";
 
 // Enrichissement des guides avec de meilleures descriptions et détails
 const quickStartGuides: FileItem[] = [
@@ -49,33 +49,7 @@ const quickStartGuides: FileItem[] = [
   }
 ];
 
-// Enrichissement avec des guides supplémentaires
-const popularDocs: FileItem[] = [
-  {
-    id: 'securite',
-    name: 'Sécurité & Authentification',
-    description: "Bonnes pratiques, OAuth 2.0, tokens JWT et protection des données sensibles",
-    type: 'markdown',
-    createdAt: '2024-03-10',
-    updatedAt: '2024-04-12',
-    icon: ShieldCheck,
-    size: null,
-    readTime: '12 min',
-    complexity: 'Avancé'
-  },
-  {
-    id: 'performances',
-    name: 'Optimisation & Performance',
-    description: "Techniques de mise en cache, compression et bonnes pratiques pour maximiser les performances",
-    type: 'markdown',
-    createdAt: '2024-03-15',
-    updatedAt: '2024-04-10',
-    icon: Zap,
-    size: null,
-    readTime: '10 min',
-    complexity: 'Intermédiaire'
-  }
-];
+
 
 // Fonctionnalités principales améliorées avec des badges et détails
 const features = [
@@ -262,6 +236,10 @@ export function QuickStart() {
     };
   }, []);
 
+
+  const { data: abbServices, isLoading, error } = useServicesByTrigramme('ABB');
+
+
   return (
       <div className="min-h-screen bg-neutral-50">
 
@@ -432,35 +410,91 @@ public class ApiController {
                   </div>
                 </div>
 
+                {/*<div>*/}
+                {/*  <div className="bg-white rounded-2xl p-8 border border-neutral-100 shadow-lg h-full">*/}
+                {/*    <div className="flex items-center justify-between mb-8">*/}
+                {/*      <h3 className="text-2xl font-bold text-neutral-800 flex items-center">*/}
+                {/*        <Star className="w-6 h-6 mr-3 text-amber-500" />*/}
+                {/*        Les plus consultés*/}
+                {/*      </h3>*/}
+                {/*      <a href="#" className="text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1 text-sm">*/}
+                {/*        <span>Tout voir</span>*/}
+                {/*        <ChevronRight className="w-4 h-4" />*/}
+                {/*      </a>*/}
+                {/*    </div>*/}
+                {/*    <div className="grid grid-cols-1 gap-6">*/}
+                {/*      {popularDocs.map((doc) => (*/}
+                {/*          <GuideCard key={doc.id} guide={doc} />*/}
+                {/*      ))}*/}
+                {/*    </div>*/}
+
+                {/*    <div className="mt-8 pt-6 border-t border-neutral-100">*/}
+                {/*      <button*/}
+                {/*          onClick={() => navigate('/documents')}*/}
+                {/*          className="w-full py-3 px-4 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-medium rounded-lg transition-colors flex items-center justify-center gap-2"*/}
+                {/*      >*/}
+                {/*        <span>Voir toute la documentation</span>*/}
+                {/*        <ArrowRight className="w-4 h-4" />*/}
+                {/*      </button>*/}
+                {/*    </div>*/}
+                {/*  </div>*/}
+                {/*</div>*/}
+
                 <div>
                   <div className="bg-white rounded-2xl p-8 border border-neutral-100 shadow-lg h-full">
                     <div className="flex items-center justify-between mb-8">
                       <h3 className="text-2xl font-bold text-neutral-800 flex items-center">
                         <Star className="w-6 h-6 mr-3 text-amber-500" />
-                        Les plus consultés
+                        Services ABB
                       </h3>
                       <a href="#" className="text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1 text-sm">
-                        <span>Tout voir</span>
+                        <span>Tous les services</span>
                         <ChevronRight className="w-4 h-4" />
                       </a>
                     </div>
+
                     <div className="grid grid-cols-1 gap-6">
-                      {popularDocs.map((doc) => (
-                          <GuideCard key={doc.id} guide={doc} />
-                      ))}
+                      {isLoading && (
+                          <div className="text-center py-8">
+                            <div className="inline-block animate-spin h-8 w-8 border-4 border-indigo-500 border-t-transparent rounded-full mb-2"></div>
+                            <p className="text-neutral-500">Chargement des services...</p>
+                          </div>
+                      )}
+
+                      {error && (
+                          <div className="text-center py-8">
+                            <div className="bg-red-50 text-red-600 p-4 rounded-lg">
+                              <p>Une erreur est survenue lors du chargement des services.</p>
+                            </div>
+                          </div>
+                      )}
+
+                      {!isLoading && !error && abbServices && abbServices.length === 0 && (
+                          <div className="text-center py-8">
+                            <p className="text-neutral-500">Aucun service trouvé pour le trigramme ABB.</p>
+                          </div>
+                      )}
+
+                      {!isLoading && !error && abbServices && abbServices.length > 0 &&
+                          // Afficher uniquement les deux premiers services
+                          abbServices.slice(0, 2).map((service) => (
+                              <CardAbb key={service.id} service={service} />
+                          ))
+                      }
                     </div>
 
                     <div className="mt-8 pt-6 border-t border-neutral-100">
                       <button
-                          onClick={() => navigate('/documents')}
+                          onClick={() => navigate('/services')}
                           className="w-full py-3 px-4 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
                       >
-                        <span>Voir toute la documentation</span>
+                        <span>Voir tous les services</span>
                         <ArrowRight className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
                 </div>
+
               </div>
             </div>
 
