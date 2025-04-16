@@ -1,4 +1,313 @@
- <Button variant="outlined" size="sm" onClick={() => DocumentService.downloadOrViewDocument(doc.id, true)}>
-                        <Download className="w-4 h-4"/>
-                        Télécharger
-                      </Button>
+package com.socgen.unibank.services.autotest.model.model;
+
+import lombok.Data;
+
+/**
+ * DTO représentant la requête de création d'un projet.
+ *
+ * Cette classe contient toutes les informations nécessaires pour configurer
+ * et générer un nouveau projet avec ses paramètres spécifiques.
+ */
+@Data
+public class ProjectRequest {
+    private String projectName;
+    private String javaVersion;
+    private String gradleVersion;
+    private String groupId;
+    private String artifactId;
+    private String description;
+    private String version = "1.0.0";
+    private String unibankDomainVersion = "3.7.79";
+    private String unibankPlatformVersion = "3.2-95";
+}
+
+
+
+--------------
+Interface: GenerateProject
+package com.socgen.unibank.services.autotest.model.usecases;
+
+import com.socgen.unibank.platform.domain.Command;
+import com.socgen.unibank.platform.models.RequestContext;
+import com.socgen.unibank.services.autotest.model.model.ProjectRequest;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
+
+public interface GenerateProject extends Command {
+    ResponseEntity<Resource> handle(ProjectRequest request, RequestContext context);
+}
+
+
+---------------
+Implementation: GenerateProjectImpl
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.stereotype.Service;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.zip.ZipOutputStream;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class GenerateProjectImpl implements GenerateProject {
+    private final Set<ProjectModuleGenerator> moduleGenerators;
+    private static final String ZIP_EXTENSION = "-project.zip";
+
+    @Override
+    public ResponseEntity<Resource> handle(ProjectRequest request, RequestContext context) {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             ZipOutputStream zos = new ZipOutputStream(baos)) {
+
+            Set<String> addedFiles = new LinkedHashSet<>();
+            log.debug("Début de la génération du projet {}", request.getProjectName());
+
+            moduleGenerators.forEach(generator -> {
+                try {
+                    generator.generate(zos, request, addedFiles);
+                } catch (IOException e) {
+                    throw new ProjectGenerationException("Échec de génération de module", e);
+                }
+            });
+
+            zos.finish();
+            log.debug("Projet {} généré avec succès", request.getProjectName());
+            return createZipResponse(request, baos);
+
+        } catch (IOException e) {
+            log.error("Erreur lors de la génération du projet {}", request.getProjectName(), e);
+            throw new ProjectGenerationException("Échec de génération du projet", e);
+        }
+    }
+
+    private ResponseEntity<Resource> createZipResponse(ProjectRequest request, ByteArrayOutputStream baos) {
+        ByteArrayResource resource = new ByteArrayResource(baos.toByteArray());
+        String filename = request.getProjectName().toLowerCase() + ZIP_EXTENSION;
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .body(resource);
+    }
+}
+
+----------------
+Interface: ProjectModuleGenerator
+import java.io.IOException;
+import java.util.Set;
+import java.util.zip.ZipOutputStream;
+
+public interface ProjectModuleGenerator {
+    /**
+     * Génère les fichiers nécessaires pour un projet spécifique
+     * et ajoute ces fichiers au flux ZIP fourni.
+     *
+     * @param zos        flux de sortie ZIP où les fichiers générés seront ajoutés
+     * @param request    objet contenant les détails nécessaires à la génération du projet
+     * @param addedFiles ensemble de chemins des fichiers déjà ajoutés pour éviter les doublons
+     * @throws IOException si une erreur survient pendant l'écriture dans le flux ZIP
+     */
+    void generate(ZipOutputStream zos, ProjectRequest request, Set<String> addedFiles) throws IOException;
+
+    /**
+     * Méthode utilitaire par défaut permettant d'ajouter un fichier dans l'archive ZIP.
+     *
+     * @param zos        flux ZIP dans lequel le contenu doit être ajouté
+     * @param path       chemin relatif du fichier dans l'archive ZIP
+     * @param content    contenu textuel à ajouter au fichier ZIP
+     * @param addedFiles ensemble des chemins déjà présents dans le ZIP (sert à éviter les duplications)
+     * @throws IOException en cas d'erreur I/O lors de l'écriture
+     * @throws IllegalStateException si une entrée dupliquée est détectée
+     */
+    default void addToZip(ZipOutputStream zos, String path, String content, Set<String> addedFiles) throws IOException {
+        if (addedFiles.contains(path)) {
+            throw new IllegalStateException(String.format("Duplicate entry detected in ZIP: %s", path));
+        }
+
+        // Création d'une nouvelle entrée dans l'archive ZIP avec le chemin spécifié
+        ZipEntry entry = new ZipEntry(path);
+        entry.setMethod(ZipEntry.DEFLATED); // Définit la méthode de compression utilisée
+        zos.putNextEntry(entry); // Initialise le flux pour accepter les données d'entrée
+
+        // Écriture du contenu textuel dans le flux ZIP avec encodage UTF-8
+        byte[] contentBytes = content.getBytes(StandardCharsets.UTF_8);
+        zos.write(contentBytes, 0, contentBytes.length);
+        zos.closeEntry();
+        addedFiles.add(path);
+    }
+}
+
+
+-----------------
+Class: RootProjectGenerator
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Set;
+import java.util.zip.ZipOutputStream;
+
+@Component
+@Slf4j
+@RequiredArgsConstructor
+public class RootProjectGenerator implements ProjectModuleGenerator {
+    private final RootProjectTemplates templates;
+    private static final List<String> ROOT_FILES = List.of(
+            "settings.gradle.kts",
+            "gradle.properties",
+            "build.gradle.kts",
+            "README.md",
+            ".gitignore"
+    );
+
+    @Override
+    public void generate(ZipOutputStream zos, ProjectRequest request, Set<String> addedFiles) throws IOException {
+        try {
+            log.debug("Generating root project files for: {}", request.getProjectName());
+            generateRootFiles(zos, request, addedFiles);
+            log.info("Root project files generated successfully");
+        } catch (Exception e) {
+            log.error("Error generating root project files", e);
+            throw new ProjectGenerationException("Échec de génération des fichiers racine", e);
+        }
+    }
+
+    private void generateRootFiles(ZipOutputStream zos, ProjectRequest request, Set<String> addedFiles) throws IOException {
+        addToZip(zos, "settings.gradle.kts", templates.getSettingsGradleKtsTemplate(request.getProjectName()), addedFiles);
+        addToZip(zos, "gradle.properties", templates.getGradlePropertiesTemplate(request), addedFiles);
+        addToZip(zos, "build.gradle.kts", templates.getBuildGradleKtsTemplate(request), addedFiles);
+        addToZip(zos, "README.md", templates.getReadmeTemplate(request), addedFiles);
+        addToZip(zos, ".gitignore", templates.getGitignoreTemplate(), addedFiles);
+    }
+}
+
+
+<hr></hr>
+Class: RootProjectTemplates
+------------------
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@Component
+public class RootProjectTemplates {
+    private final TemplateService templateService;
+
+    @Value("${unibank.domain.version:3.7.79}")
+    private String unibankDomainVersion;
+
+    @Value("${unibank.platform.version:3.2.85}")
+    private String unibankPlatformVersion;
+
+    @Value("${unibank.gradle.plugin.version:1.3.10}")
+    private String unibankGradlePluginVersion;
+
+    @Value("${foundation.gradle.plugin.version:2.0.5}")
+    private String foundationGradlePluginVersion;
+
+    @Value("${default.project.version:1.0.0}")
+    private String defaultProjectVersion;
+
+    public RootProjectTemplates(TemplateService templateService) {
+        this.templateService = templateService;
+    }
+
+    public String getSettingsGradleKtsTemplate(String projectName) {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("projectName", projectName);
+        return templateService.processTemplate("settings-gradle", variables);
+    }
+
+    public String getGradlePropertiesTemplate(ProjectRequest request) {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("groupId", request.getGroupId());
+        variables.put("version", defaultProjectVersion);
+        variables.put("unibankDomainVersion", unibankDomainVersion);
+        variables.put("unibankPlatformVersion", unibankPlatformVersion);
+        return templateService.processTemplate("gradle-properties", variables);
+    }
+
+    public String getBuildGradleKtsTemplate(ProjectRequest request) {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("javaVersion", request.getJavaVersion());
+        variables.put("unibankGradlePluginVersion", unibankGradlePluginVersion);
+        variables.put("foundationGradlePluginVersion", foundationGradlePluginVersion);
+        return templateService.processTemplate("build-gradle", variables);
+    }
+
+    public String getReadmeTemplate(ProjectRequest request) {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("projectName", request.getProjectName());
+        variables.put("description", request.getDescription());
+        variables.put("javaVersion", request.getJavaVersion());
+        variables.put("gradleVersion", request.getGradleVersion());
+        variables.put("groupId", request.getGroupId());
+        variables.put("artifactId", request.getArtifactId());
+        return templateService.processTemplate("readme", variables);
+    }
+
+    public String getGitignoreTemplate() {
+        return templateService.processTemplate("gitignore", new HashMap<>());
+    }
+}
+
+-----------------
+<hr></hr>
+Class: ApiModuleGenerator
+
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.Set;
+import java.util.zip.ZipOutputStream;
+
+@Component
+@RequiredArgsConstructor
+public class ApiModuleGenerator implements ProjectModuleGenerator {
+    private static final Logger log = LoggerFactory.getLogger(ApiModuleGenerator.class);
+    private final ApiModuleTemplates templates;
+
+    @Override
+    public void generate(ZipOutputStream zos, ProjectRequest request, Set<String> addedFiles) throws IOException {
+        String projectName = request.getProjectName();
+        String pascalCaseName = StringUtils.toPascalCase(projectName);
+        log.debug("Generating API module for project: {}", projectName);
+
+        String buildGradlePath = String.format("%s-api/build.gradle.kts", projectName);
+        addToZip(zos, buildGradlePath, templates.getApiBuildGradleTemplate(), addedFiles);
+
+        generateApiModelClasses(zos, projectName, addedFiles);
+        generateApiUseCaseInterfaces(zos, projectName, addedFiles);
+
+        String projectAPIPath = String.format("%s-api/src/main/java/com/socgen/unibank/services/api/%sAPI.java", projectName, pascalCaseName);
+        addToZip(zos, projectAPIPath, templates.getProjectApiTemplate(pascalCaseName), addedFiles);
+    }
+
+    private void generateApiModelClasses(ZipOutputStream zos, String projectName, Set<String> addedFiles) throws IOException {
+        String helloWorldRequestPath = String.format("%s-api/src/main/java/com/socgen/unibank/services/api/model/SgabsHelloworldRequest.java", projectName);
+        addToZip(zos, helloWorldRequestPath, templates.getHelloWorldRequestTemplate(), addedFiles);
+
+        String helloWorldResponsePath = String.format("%s-api/src/main/java/com/socgen/unibank/services/api/model/SgabsHelloworldResponse.java", projectName);
+        addToZip(zos, helloWorldResponsePath, templates.getHelloWorldResponseTemplate(), addedFiles);
+    }
+
+    private void generateApiUseCaseInterfaces(ZipOutputStream zos, String projectName, Set<String> addedFiles) throws IOException {
+        String createSgabsHelloWorldPath = String.format("%s-api/src/main/java/com/socgen/unibank/services/api/usecases/CreateSgabsHelloWorld.java", projectName);
+        addToZip(zos, createSgabsHelloWorldPath, templates.getCreateSgabsHelloWorldTemplate(), addedFiles);
+    }
+}
