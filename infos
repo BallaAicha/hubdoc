@@ -191,6 +191,63 @@ public class RootProjectGenerator implements ProjectModuleGenerator {
     }
 }
 
+----------------
+@Service
+public class TemplateService {
+
+    /**
+     * Le moteur de template Thymeleaf utilisé pour le traitement des templates.
+     */
+    private final TemplateEngine templateEngine;
+
+    /**
+     * Constructeur qui initialise le moteur de template Thymeleaf avec les
+     * configurations appropriées pour le traitement de fichiers texte.
+     */
+    public TemplateService() {
+        ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
+        templateResolver.setPrefix("templates/");
+        templateResolver.setSuffix(".txt");
+        templateResolver.setTemplateMode(TemplateMode.TEXT);
+        templateResolver.setCharacterEncoding("UTF-8");
+        templateResolver.setCacheable(false);
+
+        this.templateEngine = new TemplateEngine();
+        this.templateEngine.setTemplateResolver(templateResolver);
+    }
+
+    public String processTemplate(String templateName, Map<String, Object> variables) {
+        Context context = new Context();
+        variables.forEach(context::setVariable);
+        return templateEngine.process(templateName, context);
+    }
+
+    /**
+     * Traite un template en utilisant les valeurs du ProjectRequest.
+     *
+     * @param templateName   Le nom du template à traiter.
+     * @param projectRequest L'objet contenant les paramètres du projet.
+     * @return Le contenu du template après remplacement des variables.
+     */
+    public String processProjectTemplate(String templateName, ProjectRequest projectRequest) {
+        Map<String, Object> variables = new HashMap<>();
+        // Paramètres de base
+        variables.put("projectName", projectRequest.getProjectName());
+        variables.put("javaVersion", projectRequest.getJavaVersion());
+        variables.put("gradleVersion", projectRequest.getGradleVersion());
+        variables.put("groupId", projectRequest.getGroupId());
+        variables.put("artifactId", projectRequest.getArtifactId());
+        variables.put("description", projectRequest.getDescription());
+
+        // Nouveaux paramètres configurables
+        variables.put("version", projectRequest.getVersion());
+        variables.put("unibankDomainVersion", projectRequest.getUnibankDomainVersion());
+        variables.put("unibankPlatformVersion", projectRequest.getUnibankPlatformVersion());
+
+        return processTemplate(templateName, variables);
+    }
+}
+---------
 
 <hr></hr>
 Class: RootProjectTemplates
@@ -309,5 +366,496 @@ public class ApiModuleGenerator implements ProjectModuleGenerator {
     private void generateApiUseCaseInterfaces(ZipOutputStream zos, String projectName, Set<String> addedFiles) throws IOException {
         String createSgabsHelloWorldPath = String.format("%s-api/src/main/java/com/socgen/unibank/services/api/usecases/CreateSgabsHelloWorld.java", projectName);
         addToZip(zos, createSgabsHelloWorldPath, templates.getCreateSgabsHelloWorldTemplate(), addedFiles);
+    }
+}
+
+
+-------------
+package com.socgen.unibank.services.autotest.templates;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class ApiModuleTemplates {
+
+    public String getApiBuildGradleTemplate() {
+        return """
+            plugins {
+                id 'java-library'
+            }
+
+            apply plugin: 'unibank.springboot.platform'
+            apply plugin: 'unibank.maven-publish'
+            apply plugin: 'unibank.kotlin'
+
+            dependencies {
+                api("com.socgen.unibank.core:unibank-core-domain:${property("unibank.domain_version")}")
+                api("com.socgen.unibank.core:unibank-core-platform-model:${property("unibank.domain_version")}")
+                compileOnly("org.projectlombok:lombok:1.18.20")
+                implementation("org.springframework.boot:spring-boot-starter-web")
+                annotationProcessor("org.projectlombok:lombok:1.18.20")
+            }
+            """;
+    }
+
+    public String getHelloWorldRequestTemplate() {
+        return """
+            package com.socgen.unibank.services.api.model;
+
+            import lombok.AllArgsConstructor;
+            import lombok.Data;
+            import lombok.NoArgsConstructor;
+
+            @Data
+            @NoArgsConstructor
+            @AllArgsConstructor
+            public class SgabsHelloWorldRequest {
+                private String message;
+            }
+            """;
+    }
+
+    public String getHelloWorldResponseTemplate() {
+        return """
+            package com.socgen.unibank.services.api.model;
+
+            import lombok.AllArgsConstructor;
+            import lombok.Data;
+            import lombok.NoArgsConstructor;
+
+            @Data
+            @NoArgsConstructor
+            @AllArgsConstructor
+            public class SgabsHelloWorldResponse {
+                private String message;
+            }
+            """;
+    }
+
+    public String getCreateSgabsHelloWorldTemplate() {
+        return """
+            package com.socgen.unibank.services.api.usecases;
+
+            import com.socgen.unibank.platform.models.RequestContext;
+            import com.socgen.unibank.platform.domain.Command;
+            import com.socgen.unibank.services.api.model.SgabsHelloWorldRequest;
+            import com.socgen.unibank.services.api.model.SgabsHelloWorldResponse;
+
+            public interface CreateSgabsHelloWorld extends Command {
+                SgabsHelloWorldResponse handle(SgabsHelloWorldRequest input, RequestContext context);
+            }
+            """;
+    }
+
+    public String getProjectApiTemplate(String pascalCaseName) {
+        return """
+            package com.socgen.unibank.services.api;
+
+            import com.socgen.unibank.platform.models.RequestContext;
+            import com.socgen.unibank.services.api.model.SgabsHelloWorldRequest;
+            import com.socgen.unibank.services.api.model.SgabsHelloWorldResponse;
+            import com.socgen.unibank.services.api.usecases.CreateSgabsHelloWorld;
+            import io.swagger.v3.oas.annotations.Operation;
+            import io.swagger.v3.oas.annotations.Parameter;
+            import io.swagger.v3.oas.annotations.tags.Tag;
+            import org.springframework.web.bind.annotation.*;
+
+            @Tag(name = "Hello world")
+            @RequestMapping(value = "sgabs", produces = "application/json")
+            public interface %sAPI extends CreateSgabsHelloWorld {
+
+                @Operation(
+                    summary = "Create a new SgabsHelloWorld",
+                    parameters = {
+                        @Parameter(ref = "entityIdHeader", required = true)
+                    }
+                )
+                @PostMapping("/sgabs-hello-world")
+                @Override
+                SgabsHelloWorldResponse handle(@RequestBody SgabsHelloWorldRequest input, RequestContext ctx);
+            }
+            """.formatted(pascalCaseName);
+    }
+}
+
+
+----------
+
+@Component
+public class CoreModuleGenerator implements ProjectModuleGenerator {
+
+    private static final Logger log = LoggerFactory.getLogger(CoreModuleGenerator.class);
+    private final CoreModuleTemplates templates;
+
+    public CoreModuleGenerator(CoreModuleTemplates templates) {
+        this.templates = templates;
+    }
+
+    @Override
+    public void generate(ZipOutputStream zos, ProjectRequest request, Set<String> addedFiles) throws IOException {
+        String projectName = request.getProjectName();
+        String pascalCaseName = StringUtils.toPascalCase(projectName);
+
+        log.debug("Generating core module for project: {}", projectName);
+
+        // Génération du fichier build.gradle.kts
+        String buildGradlePath = String.format("%s-core/build.gradle.kts", projectName);
+        addToZip(zos, buildGradlePath, templates.getCoreBuildGradleTemplate(projectName), addedFiles);
+
+        // Génération du fichier lombok.config
+        String lombokConfigPath = String.format("%s-core/lombok.config", projectName);
+        addToZip(zos, lombokConfigPath, templates.getLombokConfigTemplate(), addedFiles);
+
+        // Génération de l'implémentation du cas d'utilisation
+        String implPath = String.format(
+            "%s-core/src/main/java/com/socgen/unibank/services/core/usecases/CreatesgabsHelloWorldImpl.java",
+            projectName
+        );
+        addToZip(zos, implPath, templates.getUseCaseImplTemplate(), addedFiles);
+    }
+}
+
+--------------
+package com.socgen.unibank.services.autotest.templates;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class CoreModuleTemplates {
+
+    public String getCoreBuildGradleTemplate(String projectName) {
+        return """
+            plugins {
+                id 'java-library'
+            }
+
+            apply(plugin = "unibank.springboot.platform")
+            apply(plugin = "unibank.maven-publish")
+            apply(plugin = "unibank.junits")
+            apply(plugin = "foundation-qa-coverage-silver")
+
+            dependencies {
+                api("com.socgen.unibank.platform:unibank-platform-core:${property("unibank.platform_version")}")
+                api("com.socgen.unibank.platform:unibank-platform-springboot:${property("unibank.platform_version")}")
+                testImplementation("com.socgen.unibank.platform:unibank-platform-springboot-test:${property("unibank.platform_version")}")
+                compileOnly("org.junit.jupiter:junit-jupiter-api:5.6.2")
+                implementation("org.projectlombok:lombok:1.18.26")
+                annotationProcessor("org.projectlombok:lombok:1.18.20")
+                implementation(project(":%s-api"))
+            }
+            """.formatted(projectName);
+    }
+
+    public String getLombokConfigTemplate() {
+        return """
+            config.stopBubbling = true
+            lombok.addLombokGeneratedAnnotation = true
+            """;
+    }
+
+    public String getUseCaseImplTemplate() {
+        return """
+            package com.socgen.unibank.services.core.usecases;
+
+            import com.socgen.unibank.platform.models.RequestContext;
+            import com.socgen.unibank.services.api.model.SgabsHelloWorldRequest;
+            import com.socgen.unibank.services.api.model.SgabsHelloWorldResponse;
+            import com.socgen.unibank.services.api.usecases.CreateSgabsHelloWorld;
+            import org.springframework.stereotype.Service;
+
+            @Service
+            public class CreateSgabsHelloWorldImpl implements CreateSgabsHelloWorld {
+
+                @Override
+                public SgabsHelloWorldResponse handle(SgabsHelloWorldRequest input, RequestContext context) {
+                    // Implémentation de la logique de création
+                    return new SgabsHelloWorldResponse("Hello, " + input.getMessage());
+                }
+            }
+            """;
+    }
+}
+
+---------------
+
+@Component
+public class GatewaysModuleGenerator implements ProjectModuleGenerator {
+
+    private static final Logger log = LoggerFactory.getLogger(GatewaysModuleGenerator.class);
+    private final GatewaysModuleTemplates templates;
+
+    public GatewaysModuleGenerator(GatewaysModuleTemplates templates) {
+        this.templates = templates;
+    }
+
+    @Override
+    public void generate(ZipOutputStream zos, ProjectRequest request, Set<String> addedFiles) throws IOException {
+        String projectName = request.getProjectName();
+        String pascalCaseName = StringUtils.toPascalCase(projectName);
+        log.debug("Generating gateways module for project: {}", projectName);
+
+        // Génération du fichier build.gradle.kts
+        addToZip(zos, String.format("%s-gateways/build.gradle.kts", projectName),
+                templates.getBuildGradleTemplate(projectName), addedFiles);
+
+        // Génération de la classe principale Spring Boot
+        String mainClassPath = String.format("%s-gateways/src/main/java/com/socgen/unibank/services/Service%s.java",
+                projectName, pascalCaseName);
+        addToZip(zos, mainClassPath,
+                templates.getMainClassTemplate(pascalCaseName), addedFiles);
+
+        // Génération des ressources de configuration
+        generateServiceResources(zos, request, projectName, addedFiles);
+
+        // Génération des fichiers de sécurité
+        generateSecurityResources(zos, projectName, addedFiles);
+
+        // Génération de l'interface gateway/inbound
+        String interfacePath = String.format("%s-gateways/src/main/java/com/socgen/unibank/services/gateway/inbound/%sEndpoint.java",
+                projectName, pascalCaseName);
+        addToZip(zos, interfacePath,
+                templates.getGatewayInterfaceTemplate(pascalCaseName), addedFiles);
+
+        // Génération de la BeansFactory
+        String beanFactoryPath = String.format("%s-gateways/src/main/java/com/socgen/unibank/services/gateway/%sBeansFactory.java",
+                projectName, pascalCaseName);
+        addToZip(zos, beanFactoryPath,
+                templates.getBeansFactoryTemplate(pascalCaseName), addedFiles);
+    }
+
+    private void generateServiceResources(ZipOutputStream zos, ProjectRequest request, String projectName, Set<String> addedFiles) throws IOException {
+        // application.yml
+        addToZip(zos, String.format("%s-gateways/src/main/resources/application.yml", projectName),
+                templates.getApplicationYmlTemplate(projectName.toLowerCase()), addedFiles);
+
+        // application-local.yml
+        addToZip(zos, String.format("%s-gateways/src/main/resources/application-local.yml", projectName),
+                templates.getApplicationLocalYmlTemplate(projectName.toLowerCase()), addedFiles);
+
+        // application-test.yml
+        addToZip(zos, String.format("%s-gateways/src/main/resources/application-test.yml", projectName),
+                templates.getApplicationTestYmlTemplate(), addedFiles);
+
+        // application-vault.yml
+        addToZip(zos, String.format("%s-gateways/src/main/resources/application-vault.yml", projectName),
+                templates.getApplicationVaultYmlTemplate(projectName.toLowerCase()), addedFiles);
+    }
+
+    private void generateSecurityResources(ZipOutputStream zos, String projectName, Set<String> addedFiles) throws IOException {
+        String[] securityFiles = {
+                "unibank-dev-jwk-pub.json",
+                "unibank-hf2-jwk-pub.json",
+                "unibank-hf-jwk-pub.json",
+                "unibank-ht-jwk-pub.json"
+        };
+        for (String fileName : securityFiles) {
+            String path = String.format("%s-gateways/src/main/resources/security/%s", projectName, fileName);
+            addToZip(zos, path, templates.getSecurityJsonTemplate(), addedFiles);
+        }
+    }
+}
+
+----------
+
+package com.socgen.unibank.services.autotest.templates;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class GatewaysModuleTemplates {
+
+    public String getBuildGradleTemplate(String projectName) {
+        return """
+            plugins {
+                id 'java-library'
+            }
+
+            apply(plugin = "unibank.service")
+            apply(plugin = "foundation-qa-coverage-bronze")
+            apply(plugin = "foundation-qa")
+
+            dependencies {
+                api("com.socgen.unibank.core:unibank-core-domain")
+                api("com.socgen.unibank.platform:unibank-platform-core")
+                implementation("commons-io:commons-io:2.11.0")
+                implementation("org.apache.commons:commons-collections4:4.4")
+                implementation(project(mapOf("path" to ":%s-api")))
+                compileOnly("org.projectlombok:lombok:1.18.20")
+                annotationProcessor("org.projectlombok:lombok:1.18.20")
+                implementation(project(":%s-core"))
+            }
+            """.formatted(projectName, projectName);
+    }
+
+    public String getMainClassTemplate(String pascalCaseName) {
+        return """
+            package com.socgen.unibank.services;
+
+            import org.springframework.boot.SpringApplication;
+            import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+            @SpringBootApplication
+            public class Service%s {
+                public static void main(String[] args) {
+                    SpringApplication.run(Service%s.class, args);
+                }
+            }
+            """.formatted(pascalCaseName, pascalCaseName);
+    }
+
+    public String getGatewayInterfaceTemplate(String pascalCaseName) {
+        return """
+            package com.socgen.unibank.services.gateway.inbound;
+
+            import org.springframework.graphql.data.method.annotation.GraphQLController;
+            import org.springframework.web.bind.annotation.RestController;
+
+            @GraphQLController
+            @RestController
+            public interface %sEndpoint extends %sAPI {
+            }
+            """.formatted(pascalCaseName, pascalCaseName);
+    }
+
+    public String getBeansFactoryTemplate(String pascalCaseName) {
+        return """
+            package com.socgen.unibank.services.gateway;
+
+            import com.socgen.unibank.platform.springboot.config.ProxyEndpoints;
+            import com.socgen.unibank.services.gateway.inbound.%sEndpoint;
+            import org.springframework.context.annotation.Bean;
+            import org.springframework.context.annotation.Configuration;
+
+            @Configuration
+            public class %sBeansFactory {
+
+                @Bean
+                ProxyEndpoints createContentAPIEndpoints() {
+                    return ProxyEndpoints.create(%sEndpoint.class);
+                }
+            }
+            """.formatted(pascalCaseName, pascalCaseName, pascalCaseName);
+    }
+
+    public String getApplicationYmlTemplate(String projectNameLowerCase) {
+        return """
+            spring:
+              application:
+                name: unibank-service-%s
+              profiles:
+                group:
+                  local: embedded-rabbitmg,database-migration
+                  test: unibank-test
+              include:
+                - unibank-core
+                - unibank-persistence-simple
+              cloud:
+                vault:
+                  enabled: false
+                  kv:
+                    enabled: false
+              jpa:
+                show-sql: true
+              properties:
+                hibernate:
+                  format_sql: true
+              logging:
+                level:
+                  org:
+                    hibernate:
+                      type: trace
+              unibank.service.persistence.tenants: 'unibank.components.db.entities*'
+            """.formatted(projectNameLowerCase);
+    }
+
+    public String getApplicationLocalYmlTemplate(String projectNameLowerCase) {
+        return """
+            spring:
+              application:
+                name: unibank-service-%s
+              unibank:
+                service:
+                  bridge:
+                    embedded: false
+                  components:
+                    db:
+                      default: h2://sa@file:./build/db/unibank;SCHEMA=BF
+                  service:
+                    security:
+                      jwk-location: classpath:/security/unibank-dev-jwk-pub.json,classpath:/security/unibank-hf-jwk-pub.json
+              server:
+                port: 8082
+              unibank:
+                components:
+                  s3:
+                    public:
+                      endpoint: https://gggghhhxxxx
+                      access-key: xxxx
+                      secret-key: xxx
+                      bucket: reporting
+                      disableCertChecking: true
+            """.formatted(projectNameLowerCase);
+    }
+
+    public String getApplicationTestYmlTemplate() {
+        return """
+            spring:
+              mvc:
+                format:
+                  date: yyyy-MM-dd
+                  date-time: yyyy-MM-dd HH:mm:ss
+              unibank:
+                components:
+                  db:
+                    entities:
+                      CI: h2://sa@file:./build/db/unibank;SCHEMA=CI
+                      CM: h2://sa@file:./build/db/unibank;SCHEMA=CM
+                      GH: h2://sa@file:../build/db/unibank;SCHEMA=GH
+                      GN: h2://sa@file:../build/db/unibank;SCHEMA=GN
+                      SN: h2://sa@file:../build/db/unibank;SCHEMA=SN
+              unibank:
+                service:
+                  security:
+                    jwk-location: /security/unibank-ht-jwk-pub.json
+              server:
+                port: 8081
+            """;
+    }
+
+    public String getApplicationVaultYmlTemplate(String projectNameLowerCase) {
+        return """
+            spring:
+              application:
+                name: unibank-service-%s
+              cloud:
+                vault:
+                  session:
+                    lifecycle:
+                      enabled: false
+                  config:
+                    lifecycle:
+                      enabled: false
+                  authentication: ${VAULT_AUTH:TOKEN}
+                  enabled: ${VAULT_ENABLED:false}
+                  fail-fast: true
+                  kv:
+                    enabled: ${VAULT_ENABLED:false}
+                    default-context: ${VAULT_CONTEXT:unibank-service}
+                  uri: ${VAULT_URI:http://localhost:8200}
+                  connection-timeout: 5000
+                  read-timeout: 15000
+                  namespace: ${VAULT_NAMESPACE:}
+                  app-role:
+                    role-id: ${VAULT_ROLE_ID:xxxxx}
+                    secret-id: ${VAULT_SECRET_ID:xxxxx}
+            """.formatted(projectNameLowerCase);
+    }
+
+    public String getSecurityJsonTemplate() {
+        return """
+            {
+                "keys": []
+            }
+            """;
     }
 }

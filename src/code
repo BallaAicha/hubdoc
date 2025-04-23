@@ -1,67 +1,201 @@
-{
-  "id": "a1b2c3d4-5678-4321-abcd-ef1234567890",
-  "name": "Authentication Banking Service",
-  "trigramme": "ABB",
-  "description": "Service central d'authentification pour toutes les applications bancaires avec support OAuth2, JWT et MFA",
-  "bridgeCommunication": true,
-  "criticality": "Critique",
-  "poCoedev": "Jean Dupont",
-  "techlead": "Marie Martin",
-  "java17Migrated": true,
-  "sonarized": true,
-  "sonarReportUrl": "https://sonar.bankingsolutions.com/dashboard?id=authentication-service",
-  "version": "2.5.0",
-  "infrastructure": {
-    "urlInt": "https://int-auth.bankingsolutions.com",
-    "urlUat": "https://uat-auth.bankingsolutions.com",
-    "urlOat": "https://oat-auth.bankingsolutions.com",
-    "urlProd": "https://auth.bankingsolutions.com"
-  },
-  "dataSources": {
-    "rabbitMQ": true,
-    "commonDB": false,
-    "dedicatedDB": true,
-    "s3": false
-  },
-  "clientConsumers": [
-    "MobileBanking",
-    "WebPortal",
-    "ATMInterface",
-    "BranchSystemApp"
-  ],
-  "consumes": [
-    "DirectoryService",
-    "BiometricValidationAPI",
-    "AuditLogger"
-  ],
-  "consumedBy": [
-    "LoanProcessingSystem",
-    "AccountManagementSystem",
-    "CardIssuanceService",
-    "CustomerPortal"
-  ],
-  "endpoints": [
-    {
-      "method": "POST",
-      "path": "/api/v2/auth/login",
-      "curl": "curl -X POST https://auth.bankingsolutions.com/api/v2/auth/login -H 'Content-Type: application/json' -d '{\"username\":\"customer123\",\"password\":\"securePass\",\"deviceId\":\"MOB-IOS-12345\"}'",
-      "expectedResponse": "{\"accessToken\":\"eyJhbGciOiJS...\",\"refreshToken\":\"eyR2eXAiOi...\",\"expiresIn\":1800,\"userProfile\":{\"id\":\"U98765\",\"role\":\"CUSTOMER\",\"lastLogin\":\"2023-10-17T08:45:23Z\"}}",
-      "description": "Authentification d'un client bancaire et génération des tokens d'accès"
-    },
-    {
-      "method": "POST",
-      "path": "/api/v2/auth/mfa/verify",
-      "curl": "curl -X POST https://auth.bankingsolutions.com/api/v2/auth/mfa/verify -H 'Content-Type: application/json' -H 'Authorization: Bearer eyJhbGciOiJS...' -d '{\"mfaCode\":\"123456\",\"mfaType\":\"SMS\"}'",
-      "expectedResponse": "{\"verified\":true,\"sessionToken\":\"eyJhbGcRTY...\",\"sessionExpiry\":\"2023-10-17T10:45:23Z\"}",
-      "description": "Vérification de l'authentification à deux facteurs"
-    },
-    {
-      "method": "POST",
-      "path": "/api/v2/auth/token/refresh",
-      "curl": "curl -X POST https://auth.bankingsolutions.com/api/v2/auth/token/refresh -H 'Content-Type: application/json' -d '{\"refreshToken\":\"eyR2eXAiOi...\"}'",
-      "expectedResponse": "{\"accessToken\":\"eyJuZXdh...\",\"expiresIn\":1800}",
-      "description": "Renouvellement du token d'accès à l'aide du token de rafraîchissement"
+// --- ProjectRequest.java (modifié)
+@Data
+public class ProjectRequest {
+    private String projectName;
+    private String javaVersion;
+    private String gradleVersion;
+    private String groupId;
+    private String artifactId;
+    private String description;
+    private String version = "1.0.0";
+    private String unibankDomainVersion = "3.7.79";
+    private String unibankPlatformVersion = "3.2-95";
+    private List<String> dependencies; // ✅ Choix des dépendances dynamiques
+}
+
+
+// --- ApiModuleTemplates.java (modifié)
+@Component
+public class ApiModuleTemplates {
+    public String getApiBuildGradleTemplate(List<String> dependencies) {
+        StringBuilder deps = new StringBuilder("""
+            plugins {
+                id 'java-library'
+            }
+
+            apply plugin: 'unibank.springboot.platform'
+            apply plugin: 'unibank.maven-publish'
+            apply plugin: 'unibank.kotlin'
+
+            dependencies {
+        """);
+
+        if (dependencies.contains("lombok")) {
+            deps.append("""
+                compileOnly("org.projectlombok:lombok:1.18.20")
+                annotationProcessor("org.projectlombok:lombok:1.18.20")
+            """);
+        }
+
+        if (dependencies.contains("web")) {
+            deps.append("""
+                implementation("org.springframework.boot:spring-boot-starter-web")
+            """);
+        }
+
+        if (dependencies.contains("validation")) {
+            deps.append("""
+                implementation("org.springframework.boot:spring-boot-starter-validation")
+            """);
+        }
+
+        deps.append("""
+            api("com.socgen.unibank.core:unibank-core-domain:${property(\"unibank.domain_version\")}")
+            api("com.socgen.unibank.core:unibank-core-platform-model:${property(\"unibank.domain_version\")}")
+        }
+        """);
+
+        return deps.toString();
     }
-  ],
-  "databaseSchema": "banking_auth_schema"
+}
+
+// --- ApiModuleGenerator.java (modifié)
+@Component
+@RequiredArgsConstructor
+public class ApiModuleGenerator implements ProjectModuleGenerator {
+    private final ApiModuleTemplates templates;
+
+    @Override
+    public void generate(ZipOutputStream zos, ProjectRequest request, Set<String> addedFiles) throws IOException {
+        String projectName = request.getProjectName();
+        addToZip(zos,
+            String.format("%s-api/build.gradle.kts", projectName),
+            templates.getApiBuildGradleTemplate(request.getDependencies()),
+            addedFiles);
+        // les autres fichiers générés ne changent pas
+    }
+}
+
+// --- CoreModuleTemplates.java (modifié)
+@Component
+public class CoreModuleTemplates {
+    public String getCoreBuildGradleTemplate(String projectName, List<String> dependencies) {
+        StringBuilder deps = new StringBuilder("""
+            plugins {
+                id 'java-library'
+            }
+
+            apply(plugin = "unibank.springboot.platform")
+            apply(plugin = "unibank.maven-publish")
+            apply(plugin = "unibank.junits")
+            apply(plugin = "foundation-qa-coverage-silver")
+
+            dependencies {
+        """);
+
+        if (dependencies.contains("lombok")) {
+            deps.append("""
+                implementation("org.projectlombok:lombok:1.18.26")
+                annotationProcessor("org.projectlombok:lombok:1.18.20")
+            """);
+        }
+
+        if (dependencies.contains("mapstruct")) {
+            deps.append("""
+                implementation("org.mapstruct:mapstruct:1.5.5.Final")
+                annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
+            """);
+        }
+
+        deps.append("""
+            api("com.socgen.unibank.platform:unibank-platform-core:${property(\"unibank.platform_version\")}")
+            api("com.socgen.unibank.platform:unibank-platform-springboot:${property(\"unibank.platform_version\")}")
+            testImplementation("com.socgen.unibank.platform:unibank-platform-springboot-test:${property(\"unibank.platform_version\")}")
+            implementation(project(\":" + projectName + "-api"))
+        }
+        """);
+        return deps.toString();
+    }
+}
+
+// --- CoreModuleGenerator.java (modifié)
+@Component
+public class CoreModuleGenerator implements ProjectModuleGenerator {
+    private final CoreModuleTemplates templates;
+
+    @Override
+    public void generate(ZipOutputStream zos, ProjectRequest request, Set<String> addedFiles) throws IOException {
+        String projectName = request.getProjectName();
+        String buildGradlePath = String.format("%s-core/build.gradle.kts", projectName);
+        addToZip(zos, buildGradlePath, templates.getCoreBuildGradleTemplate(projectName, request.getDependencies()), addedFiles);
+    }
+}
+
+// --- GatewaysModuleTemplates.java (modifié)
+@Component
+public class GatewaysModuleTemplates {
+    public String getBuildGradleTemplate(String projectName, List<String> dependencies) {
+        StringBuilder deps = new StringBuilder("""
+            plugins {
+                id 'java-library'
+            }
+
+            apply(plugin = "unibank.service")
+            apply(plugin = "foundation-qa-coverage-bronze")
+            apply(plugin = "foundation-qa")
+
+            dependencies {
+        """);
+
+        if (dependencies.contains("web")) {
+            deps.append("implementation(\"org.springframework.boot:spring-boot-starter-web\")\n");
+        }
+
+        if (dependencies.contains("graphql")) {
+            deps.append("implementation(\"org.springframework.boot:spring-boot-starter-graphql\")\n");
+        }
+
+        if (dependencies.contains("jpa")) {
+            deps.append("implementation(\"org.springframework.boot:spring-boot-starter-data-jpa\")\n");
+        }
+
+        if (dependencies.contains("vault")) {
+            deps.append("implementation(\"org.springframework.cloud:spring-cloud-starter-vault-config\")\n");
+        }
+
+        if (dependencies.contains("lombok")) {
+            deps.append("""
+                compileOnly("org.projectlombok:lombok:1.18.20")
+                annotationProcessor("org.projectlombok:lombok:1.18.20")
+            """);
+        }
+
+        deps.append("""
+            api("com.socgen.unibank.core:unibank-core-domain")
+            api("com.socgen.unibank.platform:unibank-platform-core")
+            implementation("commons-io:commons-io:2.11.0")
+            implementation("org.apache.commons:commons-collections4:4.4")
+            implementation(project(\":" + projectName + "-api"))
+            implementation(project(\":" + projectName + "-core"))
+        }
+        """);
+
+        return deps.toString();
+    }
+}
+
+// --- GatewaysModuleGenerator.java (modifié - extrait)
+@Component
+public class GatewaysModuleGenerator implements ProjectModuleGenerator {
+    private final GatewaysModuleTemplates templates;
+
+    @Override
+    public void generate(ZipOutputStream zos, ProjectRequest request, Set<String> addedFiles) throws IOException {
+        String projectName = request.getProjectName();
+        addToZip(zos,
+            String.format("%s-gateways/build.gradle.kts", projectName),
+            templates.getBuildGradleTemplate(projectName, request.getDependencies()),
+            addedFiles);
+        // autres fichiers générés inchangés
+    }
 }

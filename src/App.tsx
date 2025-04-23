@@ -12,6 +12,7 @@ import {MarkdownViewer} from "./pages/MarkdownViewer.tsx";
 import {APIDocumentation} from "./pages/APIDocumentation.tsx";
 import Documents from "./pages/Documents.tsx";
 import {ApiServiceFormPage} from "./pages/ApiServiceFormPage.tsx";
+import Frontemplate from "./pages/Frontemplate.tsx";
 
 function App() {
     return (
@@ -38,6 +39,7 @@ function App() {
                     <Route path="/quickstart" element={<QuickStart />} />
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/generate-spring-project" element={<GenerateSpringProject />} />
+                    <Route path="/generate-react-project" element={<Frontemplate />} />
                     <Route path="/login" element={<Login />} />
 
                     {/* Route dynamique pour des fichiers Markdown */}

@@ -20,6 +20,7 @@ import clsx from 'clsx';
 import React, { useEffect } from "react";
 import {useServicesByTrigramme} from "../hooks/apis/useServicesByTrigramme.ts";
 import {CardAbb} from "../components/CardAbb.tsx";
+import {ProjectSelectionButton} from "../components/templatesfrontend/ProjectSelectionButton.tsx";
 
 // Enrichissement des guides avec de meilleures descriptions et détails
 const quickStartGuides: FileItem[] = [
@@ -274,14 +275,17 @@ export function QuickStart() {
                   </p>
 
                   <div className="flex flex-wrap gap-4 items-center">
-                    <button
-                        onClick={() => navigate('/generate-spring-project')}
-                        className="flex items-center gap-3 py-3.5 px-7 bg-black text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 group"
-                    >
-                      <Plus className="w-5 h-5" />
-                      <span>Générer un projet</span>
-                      <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
-                    </button>
+                    {/*<button*/}
+                    {/*    onClick={() => navigate('/generate-spring-project')}*/}
+                    {/*    className="flex items-center gap-3 py-3.5 px-7 bg-black text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 group"*/}
+                    {/*>*/}
+                    {/*  <Plus className="w-5 h-5" />*/}
+                    {/*  <span>Générer un projet</span>*/}
+                    {/*  <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />*/}
+                    {/*</button>*/}
+
+                    <ProjectSelectionButton />
+
                     <button
                         onClick={() => navigate('/documents')}
                         className="flex items-center gap-3 py-3.5 px-7 bg-transparent border border-black/50 hover:bg-black/5 text-black font-medium rounded-lg transition-all duration-300"
