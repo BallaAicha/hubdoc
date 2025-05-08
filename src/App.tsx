@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Home } from './pages/Home';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { RootRedirect } from './components/RootRedirect';
 
 import { QuickStart } from './pages/QuickStart';
 import { GenerateSpringProject } from './pages/GenerateSpringProject';
@@ -21,35 +23,46 @@ function App() {
         <Router>
             <AuthProvider>
                 <div className="min-h-screen bg-gray-50">
-                    {/* Barre de navigation */}
-                    <Navbar />
-
-                    {/* Configuration des Routes */}
                     <Routes>
-                        <Route path="/" element={<Home />} />
-                        <Route path="/forms" element={<ApiServiceFormPage />} />
-
-
-                        {/* Routes de documents - ordre important! */}
-                        <Route path="/documents/create" element={<CreateDocument />} />
-                        <Route path="/documents/create/:parentId" element={<CreateDocument />} />
-                        <Route path="/documents/:folderId/create" element={<CreateDocument />} /> {/* Route pour créer un document dans un dossier spécifique */}
-                        <Route path="/documents/create-version" element={<CreateDocumentVersion />} /> {/* Nouvelle route pour créer une version avec folderId en paramètre de requête */}
-                        <Route path="/documents/create-version/:documentId" element={<CreateDocumentVersion />} /> {/* Route pour créer une version d'un document spécifique */}
-                        <Route path="/documents/:folderId" element={<Documents />} />
-                        <Route path="/documents" element={<Documents />} />
-
-                        <Route path="/quickstart" element={<QuickStart />} />
-                        <Route path="/settings" element={<Settings />} />
-                        <Route path="/generate-spring-project" element={<GenerateSpringProject />} />
-                        <Route path="/generate-react-project" element={<Frontemplate />} />
+                        {/* Public routes */}
                         <Route path="/login" element={<Login />} />
                         <Route path="/callback" element={<Callback />} />
 
-                        {/* Route dynamique pour des fichiers Markdown */}
-                        <Route path="/guide/:page" element={<MarkdownViewer />} />
-                        <Route path="/guide/nos-apis" element={<APIDocumentation />} />
-                        <Route path="/guide/nos-apis/:apiId" element={<APIDocumentation />} />
+                        {/* Default route - redirect based on authentication status */}
+                        <Route path="/" element={<RootRedirect />} />
+
+                        {/* Protected routes */}
+                        <Route element={<ProtectedRoute />}>
+                            {/* Layout with Navbar for authenticated users */}
+                            <Route path="/*" element={
+                                <>
+                                    <Navbar />
+                                    <Routes>
+                                        <Route path="/home" element={<Home />} />
+                                        <Route path="/forms" element={<ApiServiceFormPage />} />
+
+                                        {/* Document routes */}
+                                        <Route path="/documents/create" element={<CreateDocument />} />
+                                        <Route path="/documents/create/:parentId" element={<CreateDocument />} />
+                                        <Route path="/documents/:folderId/create" element={<CreateDocument />} />
+                                        <Route path="/documents/create-version" element={<CreateDocumentVersion />} />
+                                        <Route path="/documents/create-version/:documentId" element={<CreateDocumentVersion />} />
+                                        <Route path="/documents/:folderId" element={<Documents />} />
+                                        <Route path="/documents" element={<Documents />} />
+
+                                        <Route path="/quickstart" element={<QuickStart />} />
+                                        <Route path="/settings" element={<Settings />} />
+                                        <Route path="/generate-spring-project" element={<GenerateSpringProject />} />
+                                        <Route path="/generate-react-project" element={<Frontemplate />} />
+
+                                        {/* Markdown and API documentation routes */}
+                                        <Route path="/guide/:page" element={<MarkdownViewer />} />
+                                        <Route path="/guide/nos-apis" element={<APIDocumentation />} />
+                                        <Route path="/guide/nos-apis/:apiId" element={<APIDocumentation />} />
+                                    </Routes>
+                                </>
+                            } />
+                        </Route>
                     </Routes>
                 </div>
             </AuthProvider>

@@ -3,10 +3,11 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   Files, Home, Rocket, Settings, Menu, X, User,
   LogOut, ChevronDown, Bell, Search, Code,
-  HelpCircle, BookOpen, Building2
+  HelpCircle, Building2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
+import { useAuth } from '../context/AuthContext';
 
 export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -15,6 +16,7 @@ export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
 
+  const { user, logout } = useAuth();
   const location = useLocation();
   const userMenuRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
@@ -52,7 +54,7 @@ export function Navbar() {
   const isActive = (path: string) => location.pathname === path;
 
   const links = [
-    { to: "/", icon: <Home className="h-[18px] w-[18px]" />, label: "Accueil" },
+    { to: "/home", icon: <Home className="h-[18px] w-[18px]" />, label: "Accueil" },
     { to: "/quickstart", icon: <Rocket className="h-[18px] w-[18px]" />, label: "Démarrage rapide" },
     { to: "/guide/nos-apis", icon: <Code className="h-[18px] w-[18px]" />, label: "APIs" },
     { to: "/documents", icon: <Files className="h-[18px] w-[18px]" />, label: "Documents" }
@@ -252,7 +254,7 @@ export function Navbar() {
                     <div className="bg-gradient-to-r from-[#ed183b] to-[#be0f30] rounded-full p-1 shadow-sm">
                       <User className="h-4 w-4 text-white" />
                     </div>
-                    <span className="text-sm font-medium text-white">Ousmane</span>
+                    <span className="text-sm font-medium text-white">{user?.name || 'Utilisateur'}</span>
                     <ChevronDown className={clsx(
                         "h-3.5 w-3.5 text-white transition-transform",
                         isUserMenuOpen ? "rotate-180" : ""
@@ -269,8 +271,8 @@ export function Navbar() {
                             className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl py-1.5 z-50 text-gray-800 border border-gray-100"
                         >
                           <div className="border-b border-gray-100 pb-2 px-4 mb-1">
-                            <p className="text-sm font-medium">Ousmane</p>
-                            <p className="text-xs text-gray-500">ousmane@sgabs.com</p>
+                            <p className="text-sm font-medium">{user?.name || 'Utilisateur'}</p>
+                            <p className="text-xs text-gray-500">{user?.email || 'utilisateur@example.com'}</p>
                           </div>
 
                           <button className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors">
@@ -294,7 +296,9 @@ export function Navbar() {
                           </button>
 
                           <div className="border-t border-gray-100 mt-1 pt-1">
-                            <button className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-[#ed183b] hover:bg-gray-50 transition-colors">
+                            <button 
+                              onClick={logout}
+                              className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-[#ed183b] hover:bg-gray-50 transition-colors">
                               <LogOut className="h-4 w-4" />
                               <span>Se déconnecter</span>
                             </button>
@@ -393,8 +397,8 @@ export function Navbar() {
                           <User className="h-5 w-5 text-white" />
                         </div>
                         <div>
-                          <div className="text-gray-800 font-medium">Ousmane</div>
-                          <div className="text-xs text-gray-500">ousmane@sgabs.com</div>
+                          <div className="text-gray-800 font-medium">{user?.name || 'Utilisateur'}</div>
+                          <div className="text-xs text-gray-500">{user?.email || 'utilisateur@example.com'}</div>
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
@@ -410,7 +414,9 @@ export function Navbar() {
                           <HelpCircle className="h-4 w-4" />
                           <span>Aide</span>
                         </button>
-                        <button className="flex items-center justify-center gap-1.5 py-2 rounded-md bg-[#ed183b] text-white text-sm hover:bg-[#be0f30] transition-colors col-span-1">
+                        <button 
+                          onClick={logout}
+                          className="flex items-center justify-center gap-1.5 py-2 rounded-md bg-[#ed183b] text-white text-sm hover:bg-[#be0f30] transition-colors col-span-1">
                           <LogOut className="h-4 w-4" />
                           <span>Déconnexion</span>
                         </button>
