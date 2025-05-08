@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { FileItem } from '../test.ts';
 import {
-  Plus,
+
   FileText,
   Book,
   Code,

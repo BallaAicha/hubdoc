@@ -8,46 +8,51 @@ import { CreateDocument } from './pages/CreateDocument';
 import { CreateDocumentVersion } from './pages/CreateDocumentVersion';
 import { Settings } from './pages/Settings';
 import { Login } from './pages/Login';
-import {MarkdownViewer} from "./pages/MarkdownViewer.tsx";
-import {APIDocumentation} from "./pages/APIDocumentation.tsx";
+import { Callback } from './pages/Callback';
+import { MarkdownViewer } from "./pages/MarkdownViewer.tsx";
+import { APIDocumentation } from "./pages/APIDocumentation.tsx";
 import Documents from "./pages/Documents.tsx";
-import {ApiServiceFormPage} from "./pages/ApiServiceFormPage.tsx";
+import { ApiServiceFormPage } from "./pages/ApiServiceFormPage.tsx";
 import Frontemplate from "./pages/Frontemplate.tsx";
+import { AuthProvider } from './context/AuthContext';
 
 function App() {
     return (
         <Router>
-            <div className="min-h-screen bg-gray-50">
-                {/* Barre de navigation */}
-                <Navbar />
+            <AuthProvider>
+                <div className="min-h-screen bg-gray-50">
+                    {/* Barre de navigation */}
+                    <Navbar />
 
-                {/* Configuration des Routes */}
-                <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/forms" element={<ApiServiceFormPage />} />
+                    {/* Configuration des Routes */}
+                    <Routes>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/forms" element={<ApiServiceFormPage />} />
 
 
-                    {/* Routes de documents - ordre important! */}
-                    <Route path="/documents/create" element={<CreateDocument />} />
-                    <Route path="/documents/create/:parentId" element={<CreateDocument />} />
-                    <Route path="/documents/:folderId/create" element={<CreateDocument />} /> {/* Route pour créer un document dans un dossier spécifique */}
-                    <Route path="/documents/create-version" element={<CreateDocumentVersion />} /> {/* Nouvelle route pour créer une version avec folderId en paramètre de requête */}
-                    <Route path="/documents/create-version/:documentId" element={<CreateDocumentVersion />} /> {/* Route pour créer une version d'un document spécifique */}
-                    <Route path="/documents/:folderId" element={<Documents />} />
-                    <Route path="/documents" element={<Documents />} />
+                        {/* Routes de documents - ordre important! */}
+                        <Route path="/documents/create" element={<CreateDocument />} />
+                        <Route path="/documents/create/:parentId" element={<CreateDocument />} />
+                        <Route path="/documents/:folderId/create" element={<CreateDocument />} /> {/* Route pour créer un document dans un dossier spécifique */}
+                        <Route path="/documents/create-version" element={<CreateDocumentVersion />} /> {/* Nouvelle route pour créer une version avec folderId en paramètre de requête */}
+                        <Route path="/documents/create-version/:documentId" element={<CreateDocumentVersion />} /> {/* Route pour créer une version d'un document spécifique */}
+                        <Route path="/documents/:folderId" element={<Documents />} />
+                        <Route path="/documents" element={<Documents />} />
 
-                    <Route path="/quickstart" element={<QuickStart />} />
-                    <Route path="/settings" element={<Settings />} />
-                    <Route path="/generate-spring-project" element={<GenerateSpringProject />} />
-                    <Route path="/generate-react-project" element={<Frontemplate />} />
-                    <Route path="/login" element={<Login />} />
+                        <Route path="/quickstart" element={<QuickStart />} />
+                        <Route path="/settings" element={<Settings />} />
+                        <Route path="/generate-spring-project" element={<GenerateSpringProject />} />
+                        <Route path="/generate-react-project" element={<Frontemplate />} />
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/callback" element={<Callback />} />
 
-                    {/* Route dynamique pour des fichiers Markdown */}
-                    <Route path="/guide/:page" element={<MarkdownViewer />} />
-                    <Route path="/guide/nos-apis" element={<APIDocumentation />} />
-                    <Route path="/guide/nos-apis/:apiId" element={<APIDocumentation />} />
-                </Routes>
-            </div>
+                        {/* Route dynamique pour des fichiers Markdown */}
+                        <Route path="/guide/:page" element={<MarkdownViewer />} />
+                        <Route path="/guide/nos-apis" element={<APIDocumentation />} />
+                        <Route path="/guide/nos-apis/:apiId" element={<APIDocumentation />} />
+                    </Routes>
+                </div>
+            </AuthProvider>
         </Router>
     );
 }
