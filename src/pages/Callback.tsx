@@ -79,11 +79,10 @@ export function Callback() {
           localStorage.setItem('refresh_token', refresh_token);
         }
 
-        // Récupérer les informations de l'utilisateur à partir du id_token (JWT)
-        if (id_token) {
+        // Fonction pour décoder un JWT token
+        const decodeJwtToken = (token: string) => {
           try {
-            // Décoder le JWT (id_token)
-            const base64Url = id_token.split('.')[1];
+            const base64Url = token.split('.')[1];
             const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
             const jsonPayload = decodeURIComponent(
               atob(base64)
@@ -91,12 +90,49 @@ export function Callback() {
                 .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
                 .join('')
             );
-
-            const userInfo = JSON.parse(jsonPayload);
-            localStorage.setItem('user_info', JSON.stringify(userInfo));
+            return JSON.parse(jsonPayload);
           } catch (e) {
-            console.error('Erreur lors du décodage du id_token:', e);
+            console.error('Erreur lors du décodage du token:', e);
+            return null;
           }
+        };
+
+        // Récupérer les informations de l'utilisateur à partir du token JWT
+        try {
+          // Essayer d'abord avec id_token, puis avec access_token si id_token n'est pas disponible
+          const tokenToUse = id_token || access_token;
+
+          if (tokenToUse) {
+            // Décoder le token
+            const decodedToken = decodeJwtToken(tokenToUse);
+
+            if (decodedToken) {
+              console.log('Decoded Token Payload:', decodedToken);
+
+              // Extraire les informations utiles de l'utilisateur
+              const userInfo = {
+                sub: decodedToken.sub || '',
+                mail: decodedToken.mail || '',
+                email: decodedToken.mail || '', // Alias pour mail
+                givenname: decodedToken.givenname || '',
+                sn: decodedToken.sn || '',
+                name: `${decodedToken.givenname || ''} ${decodedToken.sn || ''}`.trim(),
+                sgjob: decodedToken.sgjob || '',
+                c: decodedToken.c || '',
+                sgservicename: decodedToken.sgservicename || '',
+                sgigg: decodedToken.sgigg || '',
+              };
+
+              console.log('Extracted User Info:', userInfo);
+              localStorage.setItem('user_info', JSON.stringify(userInfo));
+            } else {
+              console.error('Impossible de décoder le token');
+            }
+          } else {
+            console.error('Aucun token disponible pour extraire les informations utilisateur');
+          }
+        } catch (e) {
+          console.error('Erreur lors de l\'extraction des informations utilisateur:', e);
         }
 
         // Nettoyer le sessionStorage
@@ -104,7 +140,7 @@ export function Callback() {
         sessionStorage.removeItem(STATE_KEY);
 
         // Rediriger vers la page d'accueil
-        navigate('/');
+        navigate('/home');
       } catch (error) {
         console.error('Erreur lors du traitement du callback:', error);
         setError(error instanceof Error ? error.message : 'Erreur inconnue');

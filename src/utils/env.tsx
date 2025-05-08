@@ -16,9 +16,16 @@ export const STATE_KEY = 'sg-connect-state';
 
 // Interface pour l'utilisateur authentifié
 export interface UserInfo {
-  sub: string;
-  name?: string;
-  email?: string;
+  sub: string;                // Identifiant utilisateur
+  mail?: string;              // Email de l'utilisateur
+  givenname?: string;         // Prénom
+  sn?: string;                // Nom de famille
+  sgjob?: string;             // Poste/fonction
+  c?: string;                 // Pays
+  sgservicename?: string;     // Service/département
+  sgigg?: string;             // Identifiant interne
+  name?: string;              // Nom complet (peut être construit à partir de givenname et sn)
+  email?: string;             // Alias pour mail
   [key: string]: string | number | boolean | undefined; // Pour les propriétés supplémentaires retournées par SgConnect
 }
 

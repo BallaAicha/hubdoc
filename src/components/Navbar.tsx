@@ -270,9 +270,40 @@ export function Navbar() {
                             transition={{ duration: 0.2 }}
                             className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl py-1.5 z-50 text-gray-800 border border-gray-100"
                         >
-                          <div className="border-b border-gray-100 pb-2 px-4 mb-1">
-                            <p className="text-sm font-medium">{user?.name || 'Utilisateur'}</p>
-                            <p className="text-xs text-gray-500">{user?.email || 'utilisateur@example.com'}</p>
+                          <div className="border-b border-gray-100 pb-3 px-4 mb-1">
+                            <p className="text-sm font-bold">{user?.name || 'Utilisateur'}</p>
+                            <p className="text-xs text-gray-500">{user?.mail || user?.email || 'utilisateur@example.com'}</p>
+
+                            {/* Informations supplémentaires de l'utilisateur */}
+                            <div className="mt-2 pt-2 border-t border-gray-100">
+                              {user?.sgjob && (
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span className="text-xs font-medium text-gray-700">Fonction:</span>
+                                  <span className="text-xs text-gray-600">{user.sgjob}</span>
+                                </div>
+                              )}
+
+                              {user?.sgservicename && (
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span className="text-xs font-medium text-gray-700">Service:</span>
+                                  <span className="text-xs text-gray-600">{user.sgservicename}</span>
+                                </div>
+                              )}
+
+                              {user?.c && (
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span className="text-xs font-medium text-gray-700">Pays:</span>
+                                  <span className="text-xs text-gray-600">{user.c}</span>
+                                </div>
+                              )}
+
+                              {user?.sgigg && (
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span className="text-xs font-medium text-gray-700">ID:</span>
+                                  <span className="text-xs text-gray-600">{user.sgigg}</span>
+                                </div>
+                              )}
+                            </div>
                           </div>
 
                           <button className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors">
@@ -392,13 +423,46 @@ export function Navbar() {
 
                     {/* Mobile User Menu */}
                     <div className="bg-gray-50 rounded-lg p-3 mt-4">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="bg-gradient-to-r from-[#ed183b] to-[#be0f30] rounded-full p-2 shadow-sm">
+                      <div className="flex items-start gap-3 mb-3">
+                        <div className="bg-gradient-to-r from-[#ed183b] to-[#be0f30] rounded-full p-2 shadow-sm flex-shrink-0">
                           <User className="h-5 w-5 text-white" />
                         </div>
-                        <div>
+                        <div className="flex-1">
                           <div className="text-gray-800 font-medium">{user?.name || 'Utilisateur'}</div>
-                          <div className="text-xs text-gray-500">{user?.email || 'utilisateur@example.com'}</div>
+                          <div className="text-xs text-gray-500">{user?.mail || user?.email || 'utilisateur@example.com'}</div>
+
+                          {/* Informations supplémentaires de l'utilisateur */}
+                          {(user?.sgjob || user?.sgservicename || user?.c || user?.sgigg) && (
+                            <div className="mt-2 pt-2 border-t border-gray-200 grid grid-cols-2 gap-x-2 gap-y-1">
+                              {user?.sgjob && (
+                                <div className="col-span-2">
+                                  <span className="text-xs font-medium text-gray-700">Fonction: </span>
+                                  <span className="text-xs text-gray-600">{user.sgjob}</span>
+                                </div>
+                              )}
+
+                              {user?.sgservicename && (
+                                <div className="col-span-2">
+                                  <span className="text-xs font-medium text-gray-700">Service: </span>
+                                  <span className="text-xs text-gray-600">{user.sgservicename}</span>
+                                </div>
+                              )}
+
+                              {user?.c && (
+                                <div>
+                                  <span className="text-xs font-medium text-gray-700">Pays: </span>
+                                  <span className="text-xs text-gray-600">{user.c}</span>
+                                </div>
+                              )}
+
+                              {user?.sgigg && (
+                                <div>
+                                  <span className="text-xs font-medium text-gray-700">ID: </span>
+                                  <span className="text-xs text-gray-600">{user.sgigg}</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
