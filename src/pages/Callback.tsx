@@ -65,6 +65,14 @@ export function Callback() {
         const tokenData = await tokenResponse.json();
         const { access_token, refresh_token, id_token } = tokenData;
 
+        // Afficher les tokens dans la console pour le débogage
+        console.log('=== INFORMATIONS DE TOKEN ===');
+        console.log('Access Token:', access_token);
+        console.log('Refresh Token:', refresh_token);
+        console.log('ID Token:', id_token);
+        console.log('Données complètes du token:', tokenData);
+        console.log('=============================');
+
         // Stocker les tokens dans le localStorage
         localStorage.setItem('access_token', access_token);
         if (refresh_token) {
@@ -129,6 +137,12 @@ export function Callback() {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#e9041e] mx-auto mb-4"></div>
         <h2 className="text-xl font-semibold text-gray-700">Authentification en cours...</h2>
         <p className="text-gray-500 mt-2">Veuillez patienter pendant que nous finalisons votre connexion.</p>
+        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+          <p className="text-blue-700 text-sm">
+            <strong>Info:</strong> Les informations du token sont affichées dans la console du navigateur.
+            Appuyez sur F12 ou clic droit → Inspecter → Console pour les voir.
+          </p>
+        </div>
       </div>
     </div>
   );
