@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { FileItem } from '../test.ts';
 import {
-
   FileText,
   Book,
   Code,
@@ -15,9 +14,21 @@ import {
   Check,
   Clock,
   Star,
+  Plus,
+  Zap,
+  ExternalLink,
+  Eye,
+  Download,
+  ChevronDown,
+  Sparkles,
+  BarChart,
+  Layers,
+  Shield,
+  Cpu
 } from 'lucide-react';
 import clsx from 'clsx';
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from 'framer-motion';
 import {useServicesByTrigramme} from "../hooks/apis/useServicesByTrigramme.ts";
 import {CardAbb} from "../components/CardAbb.tsx";
 import {ProjectSelectionButton} from "../components/templatesfrontend/ProjectSelectionButton.tsx";
@@ -47,6 +58,121 @@ const quickStartGuides: FileItem[] = [
     size: null,
     readTime: '15 min',
     complexity: 'Intermédiaire'
+  }
+];
+
+// Documents les plus consultés avec contenu détaillé
+const popularDocs: FileItem[] = [
+  {
+    id: 'spring-boot-best-practices',
+    name: 'Bonnes pratiques Spring Boot',
+    description: "Guide complet des meilleures pratiques pour développer des applications Spring Boot performantes et maintenables",
+    type: 'markdown',
+    createdAt: '2024-02-15',
+    updatedAt: '2024-04-10',
+    icon: Cpu,
+    size: null,
+    readTime: '12 min',
+    complexity: 'Avancé',
+    content: `
+      <h3>Bonnes pratiques pour Spring Boot</h3>
+      <p>Ce guide présente les meilleures pratiques pour développer des applications Spring Boot robustes et évolutives.</p>
+
+      <h4>1. Structure du projet</h4>
+      <ul>
+        <li>Utilisez une architecture en couches (contrôleur, service, repository)</li>
+        <li>Séparez clairement les préoccupations avec des packages bien définis</li>
+        <li>Utilisez des DTOs pour séparer les modèles d'API des entités de base de données</li>
+      </ul>
+
+      <h4>2. Configuration</h4>
+      <ul>
+        <li>Externalisez la configuration avec application.properties/yml</li>
+        <li>Utilisez des profils pour différents environnements</li>
+        <li>Sécurisez les informations sensibles avec Vault ou des variables d'environnement</li>
+      </ul>
+
+      <h4>3. Sécurité</h4>
+      <ul>
+        <li>Implémentez OAuth2 et JWT pour l'authentification</li>
+        <li>Validez toutes les entrées utilisateur</li>
+        <li>Utilisez HTTPS en production</li>
+      </ul>
+    `
+  },
+  {
+    id: 'api-security',
+    name: 'Sécurité des APIs',
+    description: "Stratégies et techniques pour sécuriser vos APIs contre les vulnérabilités et les attaques courantes",
+    type: 'markdown',
+    createdAt: '2024-01-20',
+    updatedAt: '2024-04-05',
+    icon: Shield,
+    size: null,
+    readTime: '10 min',
+    complexity: 'Intermédiaire',
+    content: `
+      <h3>Sécurité des APIs</h3>
+      <p>Protégez vos APIs contre les menaces courantes avec ces pratiques essentielles de sécurité.</p>
+
+      <h4>1. Authentification et autorisation</h4>
+      <ul>
+        <li>Utilisez OAuth 2.0 et OpenID Connect pour l'authentification</li>
+        <li>Implémentez le contrôle d'accès basé sur les rôles (RBAC)</li>
+        <li>Utilisez des tokens JWT avec une durée de vie limitée</li>
+      </ul>
+
+      <h4>2. Protection contre les attaques</h4>
+      <ul>
+        <li>Implémentez la limitation de débit (rate limiting)</li>
+        <li>Protégez contre les injections SQL et NoSQL</li>
+        <li>Utilisez HTTPS avec TLS 1.3</li>
+      </ul>
+
+      <h4>3. Validation et sanitisation</h4>
+      <ul>
+        <li>Validez toutes les entrées utilisateur</li>
+        <li>Utilisez des listes blanches plutôt que des listes noires</li>
+        <li>Implémentez des validateurs personnalisés pour les cas complexes</li>
+      </ul>
+    `
+  },
+  {
+    id: 'microservices-architecture',
+    name: 'Architecture Microservices',
+    description: "Principes de conception, patterns et meilleures pratiques pour construire des systèmes basés sur les microservices",
+    type: 'markdown',
+    createdAt: '2024-02-05',
+    updatedAt: '2024-04-12',
+    icon: Layers,
+    size: null,
+    readTime: '15 min',
+    complexity: 'Avancé',
+    content: `
+      <h3>Architecture Microservices</h3>
+      <p>Guide complet pour concevoir, développer et déployer des architectures microservices évolutives.</p>
+
+      <h4>1. Principes fondamentaux</h4>
+      <ul>
+        <li>Conception autour des domaines métier (Domain-Driven Design)</li>
+        <li>Un service, une responsabilité unique</li>
+        <li>Autonomie des équipes et des services</li>
+      </ul>
+
+      <h4>2. Communication entre services</h4>
+      <ul>
+        <li>API REST pour les communications synchrones</li>
+        <li>Messaging (Kafka, RabbitMQ) pour l'asynchrone</li>
+        <li>Implémentez le pattern Circuit Breaker</li>
+      </ul>
+
+      <h4>3. Déploiement et orchestration</h4>
+      <ul>
+        <li>Conteneurisation avec Docker</li>
+        <li>Orchestration avec Kubernetes</li>
+        <li>CI/CD automatisé pour chaque service</li>
+      </ul>
+    `
   }
 ];
 
@@ -136,7 +262,9 @@ function GuideCard({ guide }: { guide: FileItem }) {
   };
 
   return (
-      <div
+      <motion.div
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() =>
               navigate(guide.type === 'markdown' || guide.type === 'api' ? `/guide/${guide.id}` : '#')
           }
@@ -144,11 +272,14 @@ function GuideCard({ guide }: { guide: FileItem }) {
       >
         <div className="p-6">
           <div className="flex items-center gap-4 mb-4">
-            <div className="p-3 bg-indigo-50 rounded-lg group-hover:bg-indigo-100 transition-colors">
-              <Icon className="w-5 h-5 text-indigo-600" />
-            </div>
+            <motion.div 
+              whileHover={{ rotate: 5 }}
+              className="p-3 bg-primary-50 rounded-lg group-hover:bg-primary-100 transition-colors"
+            >
+              <Icon className="w-5 h-5 text-primary-600" />
+            </motion.div>
             <div className="flex-1">
-              <h3 className="text-lg font-bold text-neutral-800 group-hover:text-indigo-600 transition-colors">
+              <h3 className="text-lg font-bold text-neutral-800 group-hover:text-primary-600 transition-colors">
                 {guide.name}
               </h3>
               <p className="text-sm text-neutral-500 flex items-center gap-2">
@@ -156,26 +287,144 @@ function GuideCard({ guide }: { guide: FileItem }) {
                 Mis à jour le {formatDate(guide.updatedAt)}
               </p>
             </div>
-            <div className="w-10 h-10 rounded-full bg-neutral-50 group-hover:bg-indigo-50 flex items-center justify-center transition-colors">
-              <ChevronRight className="w-5 h-5 text-neutral-400 group-hover:text-indigo-600 transition-colors" />
-            </div>
+            <motion.div 
+              whileHover={{ x: 3 }}
+              className="w-10 h-10 rounded-full bg-neutral-50 group-hover:bg-primary-50 flex items-center justify-center transition-colors"
+            >
+              <ChevronRight className="w-5 h-5 text-neutral-400 group-hover:text-primary-600 transition-colors" />
+            </motion.div>
           </div>
           <p className="text-neutral-600 line-clamp-2 mb-3">{guide.description}</p>
 
           <div className="flex items-center gap-3 mt-3">
             {guide.readTime && (
                 <span className="bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-md font-medium inline-flex items-center">
-              <Clock className="w-3 h-3 mr-1" /> {guide.readTime}
-            </span>
+                  <Clock className="w-3 h-3 mr-1" /> {guide.readTime}
+                </span>
             )}
             {guide.complexity && (
                 <span className="bg-emerald-50 text-emerald-700 text-xs px-2 py-1 rounded-md font-medium">
-              {guide.complexity}
-            </span>
+                  {guide.complexity}
+                </span>
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
+  );
+}
+
+function PopularDocCard({ doc }: { doc: FileItem }) {
+  const navigate = useNavigate();
+  const Icon = doc.icon || FileText;
+  const [expanded, setExpanded] = useState(false);
+
+  // Format date nicely
+  const formatDate = (dateString: string) => {
+    const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+    return new Date(dateString).toLocaleDateString('fr-FR', options);
+  };
+
+  return (
+    <motion.div
+      layout
+      className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-neutral-100"
+    >
+      <motion.div 
+        layout="position"
+        className="p-6"
+      >
+        <div className="flex items-center gap-4 mb-4">
+          <motion.div 
+            whileHover={{ rotate: 5 }}
+            className="p-3 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors"
+          >
+            <Icon className="w-5 h-5 text-amber-600" />
+          </motion.div>
+          <div className="flex-1">
+            <h3 className="text-lg font-bold text-neutral-800 hover:text-amber-600 transition-colors">
+              {doc.name}
+            </h3>
+            <p className="text-sm text-neutral-500 flex items-center gap-2">
+              <Clock className="w-3 h-3" />
+              Mis à jour le {formatDate(doc.updatedAt)}
+            </p>
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setExpanded(!expanded)}
+            className="w-10 h-10 rounded-full bg-neutral-50 hover:bg-amber-50 flex items-center justify-center transition-colors"
+          >
+            <motion.div
+              animate={{ rotate: expanded ? 180 : 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <ChevronDown className="w-5 h-5 text-neutral-400 hover:text-amber-600 transition-colors" />
+            </motion.div>
+          </motion.button>
+        </div>
+
+        <p className="text-neutral-600 mb-3">
+          {expanded ? doc.description : <span className="line-clamp-2">{doc.description}</span>}
+        </p>
+
+        <div className="flex items-center gap-3 mt-3">
+          {doc.readTime && (
+            <span className="bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-md font-medium inline-flex items-center">
+              <Clock className="w-3 h-3 mr-1" /> {doc.readTime}
+            </span>
+          )}
+          {doc.complexity && (
+            <span className="bg-emerald-50 text-emerald-700 text-xs px-2 py-1 rounded-md font-medium">
+              {doc.complexity}
+            </span>
+          )}
+          <span className="bg-amber-50 text-amber-700 text-xs px-2 py-1 rounded-md font-medium inline-flex items-center">
+            <Eye className="w-3 h-3 mr-1" /> Populaire
+          </span>
+        </div>
+      </motion.div>
+
+      <AnimatePresence>
+        {expanded && doc.content && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="border-t border-neutral-100 bg-neutral-50"
+          >
+            <div className="p-6">
+              <div 
+                className="prose prose-sm max-w-none prose-headings:text-amber-800 prose-a:text-primary-600"
+                dangerouslySetInnerHTML={{ __html: doc.content }}
+              />
+
+              <div className="mt-6 flex justify-between">
+                <motion.button
+                  whileHover={{ scale: 1.05, x: -3 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setExpanded(false)}
+                  className="text-neutral-500 hover:text-neutral-700 text-sm font-medium flex items-center gap-1"
+                >
+                  Réduire
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.05, x: 3 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate(`/guide/${doc.id}`)}
+                  className="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center gap-1"
+                >
+                  Voir le document complet
+                  <ExternalLink className="w-3.5 h-3.5 ml-1" />
+                </motion.button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
 
@@ -247,58 +496,159 @@ export function QuickStart() {
 
 
         {/* Hero section avec fond blanc selon la charte graphique */}
-        <div className="bg-white text-black relative overflow-hidden">
+        <div className="bg-gradient-to-br from-white to-neutral-50 text-black relative overflow-hidden">
           {/* Formes décoratives avec animation */}
-          <div className="absolute inset-0 overflow-hidden opacity-10">
-            <div className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-gray-200 animate-pulse-slow"></div>
-            <div className="absolute right-10 bottom-10 w-80 h-80 rounded-full bg-gray-200 animate-pulse-slow animation-delay-1000"></div>
-            <div className="absolute left-1/3 top-1/4 w-40 h-40 rounded-full bg-gray-200 animate-pulse-slow animation-delay-2000"></div>
-            <div className="absolute bottom-32 left-1/4 w-24 h-24 rounded-full bg-gray-200 animate-pulse-slow animation-delay-3000"></div>
+          <div className="absolute inset-0 overflow-hidden opacity-10 pointer-events-none">
+            <motion.div 
+              initial={{ scale: 0.8, opacity: 0.5 }}
+              animate={{ 
+                scale: [0.8, 1.2, 0.8],
+                opacity: [0.5, 0.8, 0.5]
+              }}
+              transition={{ 
+                repeat: Infinity,
+                duration: 8,
+                ease: "easeInOut"
+              }}
+              className="absolute -left-20 -top-20 w-64 h-64 rounded-full bg-primary-200"
+            />
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0.6 }}
+              animate={{ 
+                scale: [0.9, 1.1, 0.9],
+                opacity: [0.6, 0.9, 0.6]
+              }}
+              transition={{ 
+                repeat: Infinity,
+                duration: 10,
+                ease: "easeInOut",
+                delay: 1
+              }}
+              className="absolute right-10 bottom-10 w-80 h-80 rounded-full bg-secondary-200"
+            />
+            <motion.div 
+              initial={{ scale: 0.7, opacity: 0.4 }}
+              animate={{ 
+                scale: [0.7, 1.3, 0.7],
+                opacity: [0.4, 0.7, 0.4]
+              }}
+              transition={{ 
+                repeat: Infinity,
+                duration: 12,
+                ease: "easeInOut",
+                delay: 2
+              }}
+              className="absolute left-1/3 top-1/4 w-40 h-40 rounded-full bg-amber-200"
+            />
+            <motion.div 
+              initial={{ scale: 0.6, opacity: 0.3 }}
+              animate={{ 
+                scale: [0.6, 1.4, 0.6],
+                opacity: [0.3, 0.6, 0.3]
+              }}
+              transition={{ 
+                repeat: Infinity,
+                duration: 14,
+                ease: "easeInOut",
+                delay: 3
+              }}
+              className="absolute bottom-32 left-1/4 w-24 h-24 rounded-full bg-emerald-200"
+            />
           </div>
 
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32 relative z-10">
             <div className="max-w-7xl mx-auto">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-10">
-                <div className="max-w-2xl">
-                  <div className="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 text-black mb-6 text-sm font-medium backdrop-blur-sm">
-                    <Rocket className="w-4 h-4 mr-2" />
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.7 }}
+                  className="max-w-2xl"
+                >
+                  <motion.div 
+                    initial={{ opacity: 0, y: -10, scale: 0.9 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ delay: 0.2, duration: 0.5 }}
+                    className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-primary-50 to-primary-100 text-primary-800 mb-6 text-sm font-medium shadow-sm border border-primary-200"
+                  >
+                    <Zap className="w-4 h-4 mr-2 text-primary-500" />
                     <span className="relative">Plateforme de développement de nouvelle génération</span>
-                  </div>
-                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight tracking-tight">
+                  </motion.div>
+
+                  <motion.h1 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3, duration: 0.7 }}
+                    className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight tracking-tight"
+                  >
                     Accélérez votre <br className="hidden md:inline" />
-                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-yellow-600 font-extrabold">
-                    innovation
-                  </span>
-                  </h1>
-                  <p className="text-xl text-black/80 leading-relaxed max-w-xl mb-8">
+                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-700 font-extrabold relative inline-block">
+                      innovation
+                      <motion.div
+                        initial={{ width: "0%" }}
+                        animate={{ width: "100%" }}
+                        transition={{ delay: 1, duration: 0.8 }}
+                        className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-primary-400 to-primary-600 rounded-full"
+                      />
+                    </span>
+                  </motion.h1>
+
+                  <motion.p 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5, duration: 0.7 }}
+                    className="text-xl text-black/80 leading-relaxed max-w-xl mb-8"
+                  >
                     Notre plateforme documentaire et nos outils optimisés vous permettent de développer plus rapidement, avec une qualité industrielle inégalée.
-                  </p>
+                  </motion.p>
 
-                  <div className="flex flex-wrap gap-4 items-center">
-                    {/*<button*/}
-                    {/*    onClick={() => navigate('/generate-spring-project')}*/}
-                    {/*    className="flex items-center gap-3 py-3.5 px-7 bg-black text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 group"*/}
-                    {/*>*/}
-                    {/*  <Plus className="w-5 h-5" />*/}
-                    {/*  <span>Générer un projet</span>*/}
-                    {/*  <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />*/}
-                    {/*</button>*/}
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.7, duration: 0.7 }}
+                    className="flex flex-wrap gap-4 items-center"
+                  >
+                    <motion.div
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                    >
+                      <ProjectSelectionButton />
+                    </motion.div>
 
-                    <ProjectSelectionButton />
-
-                    <button
-                        onClick={() => navigate('/documents')}
-                        className="flex items-center gap-3 py-3.5 px-7 bg-transparent border border-black/50 hover:bg-black/5 text-black font-medium rounded-lg transition-all duration-300"
+                    <motion.button
+                      whileHover={{ scale: 1.03, x: 5 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => navigate('/documents')}
+                      className="flex items-center gap-3 py-3.5 px-7 bg-transparent border border-primary-300 hover:bg-primary-50 text-primary-700 font-medium rounded-lg transition-all duration-300"
                     >
                       <Book className="w-5 h-5" />
                       <span>Consulter la doc</span>
-                    </button>
-                  </div>
-                </div>
+                    </motion.button>
 
-                <div className="hidden lg:block w-96 h-96 relative">
-                  <div className="absolute inset-0 bg-gray-100 backdrop-blur-xl rounded-2xl overflow-hidden border border-gray-200">
-                    <div className="absolute top-0 right-0 left-0 h-1.5 bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500"></div>
+                    <motion.button
+                      whileHover={{ scale: 1.03, y: -2 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => navigate('/generate-spring-project')}
+                      className="flex items-center gap-2 py-2 px-4 bg-white text-primary-700 font-medium rounded-full transition-all duration-300 shadow-sm border border-primary-200 hover:shadow-md"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Nouveau projet</span>
+                    </motion.button>
+                  </motion.div>
+                </motion.div>
+
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.5, duration: 0.7 }}
+                  className="hidden lg:block w-96 h-96 relative"
+                >
+                  <motion.div 
+                    whileHover={{ y: -5, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    className="absolute inset-0 bg-gradient-to-br from-white to-neutral-50 backdrop-blur-xl rounded-2xl overflow-hidden border border-neutral-200 shadow-xl"
+                  >
+                    <div className="absolute top-0 right-0 left-0 h-1.5 bg-gradient-to-r from-primary-500 via-primary-600 to-primary-700"></div>
                     <div className="p-8 h-full flex flex-col">
                       <div className="flex items-center mb-6">
                         <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
@@ -306,7 +656,7 @@ export function QuickStart() {
                         <div className="w-3 h-3 rounded-full bg-green-500"></div>
                       </div>
                       <div className="flex-1 overflow-hidden">
-                      <pre className="text-xs text-white/80 font-mono overflow-hidden bg-black p-4 rounded">
+                      <pre className="text-xs text-white/80 font-mono overflow-hidden bg-secondary-900 p-4 rounded-lg shadow-inner">
                         <code className="language-java">
 {`@RestController
 @RequestMapping("/api/v1")
@@ -323,36 +673,100 @@ public class ApiController {
                         </code>
                       </pre>
                       </div>
-                      <div className="h-8 bg-gray-200 rounded flex items-center px-3 mt-auto">
-                        <span className="text-xs text-green-700">✓ Prêt pour le déploiement</span>
+                      <div className="h-8 bg-emerald-50 rounded-lg flex items-center px-3 mt-auto border border-emerald-200">
+                        <span className="text-xs text-emerald-700 font-medium flex items-center">
+                          <Check className="w-3.5 h-3.5 mr-1.5 text-emerald-500" />
+                          Prêt pour le déploiement
+                        </span>
                       </div>
                     </div>
-                  </div>
-                </div>
+                  </motion.div>
+                </motion.div>
               </div>
 
               {/* Stats cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-16">
-                <StatCard icon={Terminal} value="< 2 min" label="Temps de génération d'un projet" />
-                <StatCard icon={Code} value="25+" label="APIs documentées" />
-                <StatCard icon={Book} value="10+" label="Guides techniques" />
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.8, duration: 0.5 }}
+                >
+                  <StatCard icon={Terminal} value="< 2 min" label="Temps de génération d'un projet" />
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.9, duration: 0.5 }}
+                >
+                  <StatCard icon={BarChart} value="25+" label="APIs documentées" />
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.0, duration: 0.5 }}
+                >
+                  <StatCard icon={Book} value="10+" label="Guides techniques" />
+                </motion.div>
               </div>
             </div>
           </div>
         </div>
         {/* Trust section */}
         <div className="bg-white border-b border-neutral-100">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="max-w-7xl mx-auto">
-              <p className="text-center text-sm font-medium text-neutral-500 mb-6">TRUSTED BY INDUSTRY LEADERS</p>
-              <div className="flex flex-wrap justify-center items-center gap-8 sm:gap-12 opacity-70">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="flex items-center justify-center gap-2 mb-8"
+              >
+                <div className="h-px w-12 bg-neutral-200"></div>
+                <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-neutral-50 border border-neutral-200">
+                  <Rocket className="w-3.5 h-3.5 text-primary-500" />
+                  <p className="text-sm font-medium text-neutral-700">TRUSTED BY INDUSTRY LEADERS</p>
+                </div>
+                <div className="h-px w-12 bg-neutral-200"></div>
+              </motion.div>
+
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.2 }}
+                className="flex flex-wrap justify-center items-center gap-8 sm:gap-12"
+              >
                 {/* Placeholder logos - à remplacer par vos propres logos */}
-                <img src="src/logo.jpeg" alt="Client" className="h-8 w-auto" />
-                <img src="src/logo.jpeg" alt="Client" className="h-8 w-auto" />
-                <img src="src/logo.jpeg" alt="Client" className="h-8 w-auto" />
-                <img src="src/logo.jpeg" alt="Client" className="h-8 w-auto" />
-                <img src="src/logo.jpeg" alt="Client" className="h-8 w-auto" />
-              </div>
+                <motion.img 
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  src="src/logo.jpeg" 
+                  alt="Client" 
+                  className="h-10 w-auto grayscale hover:grayscale-0 transition-all duration-300" 
+                />
+                <motion.img 
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  src="src/logo.jpeg" 
+                  alt="Client" 
+                  className="h-10 w-auto grayscale hover:grayscale-0 transition-all duration-300" 
+                />
+                <motion.img 
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  src="src/logo.jpeg" 
+                  alt="Client" 
+                  className="h-10 w-auto grayscale hover:grayscale-0 transition-all duration-300" 
+                />
+                <motion.img 
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  src="src/logo.jpeg" 
+                  alt="Client" 
+                  className="h-10 w-auto grayscale hover:grayscale-0 transition-all duration-300" 
+                />
+                <motion.img 
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  src="src/logo.jpeg" 
+                  alt="Client" 
+                  className="h-10 w-auto grayscale hover:grayscale-0 transition-all duration-300" 
+                />
+              </motion.div>
             </div>
           </div>
         </div>
@@ -414,35 +828,48 @@ public class ApiController {
                   </div>
                 </div>
 
-                {/*<div>*/}
-                {/*  <div className="bg-white rounded-2xl p-8 border border-neutral-100 shadow-lg h-full">*/}
-                {/*    <div className="flex items-center justify-between mb-8">*/}
-                {/*      <h3 className="text-2xl font-bold text-neutral-800 flex items-center">*/}
-                {/*        <Star className="w-6 h-6 mr-3 text-amber-500" />*/}
-                {/*        Les plus consultés*/}
-                {/*      </h3>*/}
-                {/*      <a href="#" className="text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1 text-sm">*/}
-                {/*        <span>Tout voir</span>*/}
-                {/*        <ChevronRight className="w-4 h-4" />*/}
-                {/*      </a>*/}
-                {/*    </div>*/}
-                {/*    <div className="grid grid-cols-1 gap-6">*/}
-                {/*      {popularDocs.map((doc) => (*/}
-                {/*          <GuideCard key={doc.id} guide={doc} />*/}
-                {/*      ))}*/}
-                {/*    </div>*/}
+                <div>
+                  <div className="bg-white rounded-2xl p-8 border border-neutral-100 shadow-lg h-full">
+                    <div className="flex items-center justify-between mb-8">
+                      <h3 className="text-2xl font-bold text-neutral-800 flex items-center">
+                        <motion.div
+                          whileHover={{ rotate: 10, scale: 1.1 }}
+                          className="flex items-center justify-center"
+                        >
+                          <Star className="w-6 h-6 mr-3 text-amber-500" />
+                          <Sparkles className="w-4 h-4 text-amber-400 absolute -mt-3 ml-4" />
+                        </motion.div>
+                        Les plus consultés
+                      </h3>
+                      <motion.a 
+                        whileHover={{ x: 3 }}
+                        href="#" 
+                        className="text-primary-600 hover:text-primary-800 font-medium flex items-center gap-1 text-sm"
+                      >
+                        <span>Tout voir</span>
+                        <ChevronRight className="w-4 h-4" />
+                      </motion.a>
+                    </div>
+                    <div className="grid grid-cols-1 gap-6">
+                      {popularDocs.map((doc) => (
+                        <PopularDocCard key={doc.id} doc={doc} />
+                      ))}
+                    </div>
 
-                {/*    <div className="mt-8 pt-6 border-t border-neutral-100">*/}
-                {/*      <button*/}
-                {/*          onClick={() => navigate('/documents')}*/}
-                {/*          className="w-full py-3 px-4 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-medium rounded-lg transition-colors flex items-center justify-center gap-2"*/}
-                {/*      >*/}
-                {/*        <span>Voir toute la documentation</span>*/}
-                {/*        <ArrowRight className="w-4 h-4" />*/}
-                {/*      </button>*/}
-                {/*    </div>*/}
-                {/*  </div>*/}
-                {/*</div>*/}
+                    <div className="mt-8 pt-6 border-t border-neutral-100">
+                      <motion.button
+                        whileHover={{ y: -2, boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)" }}
+                        whileTap={{ y: 0 }}
+                        onClick={() => navigate('/documents')}
+                        className="w-full py-3 px-4 bg-gradient-to-r from-amber-50 to-amber-100 hover:from-amber-100 hover:to-amber-200 text-amber-800 font-medium rounded-lg transition-colors flex items-center justify-center gap-2 border border-amber-200"
+                      >
+                        <Download className="w-4 h-4" />
+                        <span>Télécharger la documentation</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </motion.button>
+                    </div>
+                  </div>
+                </div>
 
                 <div>
                   <div className="bg-white rounded-2xl p-8 border border-neutral-100 shadow-lg h-full">
