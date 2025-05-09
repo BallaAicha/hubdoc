@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import {
   Mail, Phone, ExternalLink, Download, HelpCircle,
   AlertCircle, Calendar, ChevronRight, Search,
-  Bell, Users, BookOpen, BarChart, Briefcase, Clock
+  Users, BookOpen, BarChart, Briefcase, Clock,
+  FileText, Code, Zap, ArrowRight, Star, Activity
 } from 'lucide-react';
 import { RecentPresentation } from '../test.ts';
+import { motion } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
 import clsx from 'clsx';
 
 // Données des présentations récentes
@@ -145,51 +148,26 @@ const SearchBar = () => (
     </div>
 );
 
-// Nouveau composant de navigation
-const Navbar = () => (
-    <nav className="bg-white shadow-sm border-b border-neutral-200/80 fixed top-0 left-0 right-0 z-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            <div className="flex-shrink-0 flex items-center">
-              <img className="h-8 w-auto" src="/logo.svg" alt="Company Logo" />
-              <span className="ml-2 text-lg font-semibold text-primary-800">PortailPro</span>
-            </div>
-            <div className="hidden md:ml-10 md:flex md:space-x-8">
-              <a href="#" className="border-primary-500 text-neutral-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                Accueil
-              </a>
-              <a href="#" className="border-transparent text-neutral-500 hover:border-neutral-300 hover:text-neutral-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                Documents
-              </a>
-              <a href="#" className="border-transparent text-neutral-500 hover:border-neutral-300 hover:text-neutral-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                Présentations
-              </a>
-              <a href="#" className="border-transparent text-neutral-500 hover:border-neutral-300 hover:text-neutral-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                Aide
-              </a>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <button className="p-1.5 rounded-full text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100">
-              <Bell className="w-5 h-5" />
-            </button>
-            <div className="ml-3 relative">
-              <div>
-                <button className="flex text-sm rounded-full focus:outline-none">
-                  <div className="h-8 w-8 rounded-full bg-neutral-200 flex items-center justify-center text-neutral-700 font-medium">
-                    UT
-                  </div>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </nav>
+// Composant pour les boutons d'action rapide
+const QuickActionButton = ({ icon, title, description, onClick, color = "primary" }) => (
+  <motion.button
+    whileHover={{ scale: 1.03 }}
+    whileTap={{ scale: 0.98 }}
+    className={`w-full flex items-center gap-4 p-4 rounded-lg hover:bg-${color}-50/50 transition-colors text-neutral-800 border border-neutral-200 group`}
+    onClick={onClick}
+  >
+    <div className={`w-12 h-12 rounded-full bg-${color}-50 flex items-center justify-center flex-shrink-0 group-hover:bg-${color}-100 transition-colors`}>
+      {icon}
+    </div>
+    <div className="text-left">
+      <span className="font-medium block mb-1">{title}</span>
+      <span className="text-sm text-neutral-500">{description}</span>
+    </div>
+  </motion.button>
 );
 
 export function Home() {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
 
   // Simuler un chargement initial pour une transition fluide
@@ -203,67 +181,157 @@ export function Home() {
 
   if (loading) {
     return (
-        <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700 mx-auto"></div>
-            <p className="mt-4 text-neutral-600">Chargement de votre portail...</p>
-          </div>
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+          <p className="mt-4 text-neutral-600">Chargement de votre portail...</p>
         </div>
+      </div>
     );
   }
 
   return (
-      <div className="min-h-screen bg-neutral-50">
-        <Navbar />
+    <div className="min-h-screen bg-neutral-50">
+      {/* Le Navbar est importé depuis components/Navbar.tsx */}
 
-        {/* En-tête Principal avec dégradé */}
-        <header className="bg-gradient-to-r from-primary-700 via-primary-600 to-primary-500 pt-24 pb-32 px-6">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-              <div className="mb-8 md:mb-0">
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-black">
-                  Bienvenue sur votre Portail
-                </h1>
-                <p className="mt-4 text-lg md:text-xl text-black/90 max-w-2xl font-light">
-                  Accédez aux documents, présentations et ressources pour optimiser vos processus.
-                </p>
+      {/* En-tête Principal avec dégradé */}
+      <header className="bg-gradient-to-r from-secondary-900 via-secondary-800 to-primary-900 pt-28 pb-36 px-6 relative overflow-hidden">
+        {/* Éléments décoratifs */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -right-10 -top-10 w-64 h-64 bg-primary-500 opacity-10 rounded-full blur-3xl"></div>
+          <div className="absolute left-1/4 bottom-0 w-96 h-96 bg-secondary-500 opacity-10 rounded-full blur-3xl"></div>
+        </div>
+
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="max-w-7xl mx-auto relative z-10"
+        >
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div className="mb-8 md:mb-0">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white">
+                Bienvenue, {user?.givenname || 'sur votre Portail'}
+              </h1>
+              <p className="mt-4 text-lg md:text-xl text-white/80 max-w-2xl font-light">
+                Accédez aux documents, présentations et ressources pour optimiser vos processus.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <motion.button 
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 rounded-lg font-medium flex items-center gap-2 shadow-lg shadow-primary-600/20"
+                >
+                  <FileText size={18} />
+                  Explorer les documents
+                </motion.button>
+                <motion.button 
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white px-5 py-2.5 rounded-lg font-medium flex items-center gap-2 border border-white/20"
+                >
+                  <Code size={18} />
+                  Voir les APIs
+                </motion.button>
               </div>
+            </div>
+            <div className="w-full md:w-auto">
               <SearchBar />
             </div>
           </div>
-        </header>
+        </motion.div>
+      </header>
 
-        {/* Statistiques rapides */}
-        <div className="max-w-7xl mx-auto px-4 -mt-16">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {quickStats.map((stat) => (
-                <div
-                    key={stat.id}
-                    className="bg-white rounded-xl shadow overflow-hidden flex items-center p-6 transform transition-all hover:-translate-y-1 hover:shadow-md"
-                >
-                  <div className={`${stat.color} p-3 rounded-lg`}>
-                    {stat.icon}
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-neutral-500">{stat.label}</p>
-                    <p className="text-2xl font-bold text-neutral-800">{stat.value}</p>
-                  </div>
-                </div>
-            ))}
-          </div>
+      {/* Statistiques rapides */}
+      <div className="max-w-7xl mx-auto px-4 -mt-20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {quickStats.map((stat, index) => (
+            <motion.div
+              key={stat.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.1 }}
+              className="bg-white rounded-xl shadow-lg shadow-secondary-900/5 overflow-hidden flex items-center p-6 hover:shadow-xl hover:shadow-secondary-900/10 transition-all duration-300"
+            >
+              <div className={`bg-gradient-to-br from-primary-500 to-primary-600 text-white p-3 rounded-lg`}>
+                {stat.icon}
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-neutral-500">{stat.label}</p>
+                <p className="text-2xl font-bold text-neutral-800">{stat.value}</p>
+              </div>
+              <div className="ml-auto">
+                <Activity className="w-5 h-5 text-primary-500/50" />
+              </div>
+            </motion.div>
+          ))}
         </div>
+      </div>
 
         {/* Notification principale */}
         <div className="max-w-7xl mx-auto px-4 mt-8">
-          <div className="bg-white border-l-4 border-amber-500 text-neutral-700 p-5 rounded-lg flex items-center gap-4 mb-8 shadow-sm">
-            <AlertCircle className="w-6 h-6 text-amber-500 flex-shrink-0" />
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.3 }}
+            className="bg-gradient-to-r from-secondary-50 to-secondary-100 border-l-4 border-primary-500 text-neutral-700 p-5 rounded-lg flex items-center gap-4 mb-8 shadow-sm"
+          >
+            <div className="bg-primary-100 p-2 rounded-full">
+              <AlertCircle className="w-6 h-6 text-primary-600 flex-shrink-0" />
+            </div>
             <div>
-              <p className="font-medium">Information importante</p>
+              <p className="font-medium text-secondary-900">Information importante</p>
               <p className="text-neutral-600">
-                Merci de consulter la <span className="font-medium text-primary-700">base de connaissance</span> pour découvrir la procédure en cours pour votre intégration.
+                Merci de consulter la <span className="font-medium text-primary-600 hover:text-primary-700 cursor-pointer">base de connaissance</span> pour découvrir la procédure en cours pour votre intégration.
               </p>
             </div>
-          </div>
+          </motion.div>
+        </div>
+
+        {/* Accès rapide */}
+        <div className="max-w-7xl mx-auto px-4 mt-8 mb-12">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-secondary-900 flex items-center">
+                <Zap className="mr-2 text-primary-500" size={24} />
+                Accès rapide
+              </h2>
+              <motion.button 
+                whileHover={{ scale: 1.03, x: 3 }}
+                className="text-primary-600 hover:text-primary-700 font-medium flex items-center"
+              >
+                Tout voir
+                <ArrowRight className="ml-1 w-4 h-4" />
+              </motion.button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <QuickActionButton 
+                icon={<FileText className="w-6 h-6 text-primary-600" />}
+                title="Créer un document"
+                description="Ajouter un nouveau document à la base"
+                onClick={() => {}}
+              />
+
+              <QuickActionButton 
+                icon={<Code className="w-6 h-6 text-primary-600" />}
+                title="Explorer les APIs"
+                description="Découvrir les APIs disponibles"
+                onClick={() => {}}
+              />
+
+              <QuickActionButton 
+                icon={<Star className="w-6 h-6 text-primary-600" />}
+                title="Contenu favoris"
+                description="Accéder à vos documents favoris"
+                onClick={() => {}}
+              />
+            </div>
+          </motion.div>
         </div>
 
         {/* Contenu Principal */}

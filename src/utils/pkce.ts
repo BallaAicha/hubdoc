@@ -1,6 +1,9 @@
 /**
  * Utilitaire pour générer les challenges PKCE (Proof Key for Code Exchange)
  * nécessaires pour l'authentification OAuth2 avec SgConnect
+ *
+ * - Contient des fonctions de sécurité pour le processus d'authentification
+ * - Génère des codes spéciaux pour protéger l'échange d'informations
  */
 
 // Fonction pour générer un code verifier aléatoire

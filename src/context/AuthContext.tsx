@@ -41,15 +41,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Fonction pour initier le processus de connexion
   const login = async () => {
     try {
-      // Générer le challenge PKCE
+      // Générer le challenge PKCE qui permet de sécuriser le flux d'autorisation
       const cr = await pkceChallenge();
       
-      // Générer un état aléatoire pour la sécurité
+      // Générer un état aléatoire pour la sécurité pour éviter les attaques CSRF
       const state = Array.from(window.crypto.getRandomValues(new Uint8Array(16)))
         .map(b => b.toString(16).padStart(2, '0'))
         .join('');
       
-      // Stocker le code_verifier et l'état dans le sessionStorage
+      // Stocker le code_verifier et l'état dans le sessionStorage, cee code_verifier
       sessionStorage.setItem(CODE_VERIFIER_KEY, cr.code_verifier);
       sessionStorage.setItem(STATE_KEY, state);
       
