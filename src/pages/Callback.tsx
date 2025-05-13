@@ -175,6 +175,7 @@ export const Callback: React.FC = () => {
 
       interface TokenResponse {
         access_token: string;
+        id_token?: string;
         refresh_token?: string;
         token_type: string;
         expires_in: number;
@@ -205,15 +206,22 @@ export const Callback: React.FC = () => {
         return;
       }
 
-      if (!res.access_token || typeof res.access_token !== 'string') {
-        console.error('Invalid or missing access token in response:', res);
+      // Check for either id_token or access_token
+      const id_token = res.id_token;
+      const access_token = res.access_token;
+
+      if ((!id_token || typeof id_token !== 'string') && (!access_token || typeof access_token !== 'string')) {
+        console.error('Invalid or missing tokens in response:', res);
         alert('Authentication failed. Invalid token received.');
         navigate('/login');
         return;
       }
 
+      // Use id_token if available, otherwise use access_token
+      const tokenToUse = id_token || access_token;
+
       // Decode the JWT token using our simple function
-      const decoded = decodeJwtToken(res.access_token);
+      const decoded = decodeJwtToken(tokenToUse);
       if (!decoded) {
         console.error('Error decoding JWT token');
         alert('Authentication failed. Invalid token format.');
@@ -221,8 +229,24 @@ export const Callback: React.FC = () => {
         return;
       }
 
+      console.log('Decoded Token Payload:', decoded);
+
+      // Extract user information as shown in the example
+      const userInfo = {
+        sub: decoded.sub || '',
+        mail: decoded.mail || '',
+        email: decoded.mail || decoded.email || '', // Alias for mail
+        givenname: decoded.givenname || '',
+        sn: decoded.sn || '',
+        name: `${decoded.givenname || ''} ${decoded.sn || ''}`.trim() || decoded.name || '',
+        sgjob: decoded.sgjob || '',
+        c: decoded.c || '',
+        sgservicename: decoded.sgservicename || '',
+        sgigg: decoded.sgigg || ''
+      };
+
       // Store token in localStorage for future use
-      localStorage.setItem('access_token', res.access_token);
+      localStorage.setItem('access_token', tokenToUse);
       if (res.refresh_token) {
         localStorage.setItem('refresh_token', res.refresh_token);
       }
@@ -231,16 +255,16 @@ export const Callback: React.FC = () => {
       sessionStorage.removeItem(CODE_VERIFIER_KEY);
       sessionStorage.removeItem(STATE_KEY);
 
-      // Store user info in localStorage - simplified to use all properties from decoded token
-      localStorage.setItem('user_info', JSON.stringify(decoded));
+      // Store user info in localStorage
+      localStorage.setItem('user_info', JSON.stringify(userInfo));
 
-      // Dispatch user info to Redux store - simplified to use generic properties
+      // Dispatch user info to Redux store
       dispatch(
         setAuthenticationUser({
-          userName: decoded.name || decoded.preferred_username || decoded.sub || 'User',
+          userName: userInfo.name || userInfo.sub || 'User',
           isAuthenticated: true,
-          mail: decoded.mail || decoded.email || '',
-          token: res.access_token,
+          mail: userInfo.mail || userInfo.email || '',
+          token: tokenToUse,
         })
       );
 
