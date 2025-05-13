@@ -2,12 +2,29 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '../hooks/useReduxHooks';
 import { setAuthenticationUser } from '../store/authSlice';
-import { jwtDecode } from 'jwt-decode';
 import { auth } from './env';
 
 // Constants for sessionStorage keys
 const CODE_VERIFIER_KEY = 'sg-connect-code-verifier';
 const STATE_KEY = 'sg-connect-state';
+
+// Function to decode a JWT token
+const decodeJwtToken = (token: string) => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    console.error('Error decoding JWT token:', e);
+    return null;
+  }
+};
 
 export const Callback: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -163,18 +180,6 @@ export const Callback: React.FC = () => {
         expires_in: number;
       }
 
-      interface DecodedToken {
-        givenname: string;
-        sn: string;
-        mail: string;
-        sub: string;
-        sgjob?: string;
-        c?: string;
-        sgservicename?: string;
-        sgigg?: string;
-        [key: string]: string | undefined;
-      }
-
       let res: TokenResponse;
       try {
         res = await response.json();
@@ -207,11 +212,10 @@ export const Callback: React.FC = () => {
         return;
       }
 
-      let decoded: DecodedToken;
-      try {
-        decoded = jwtDecode<DecodedToken>(res.access_token);
-      } catch (decodeError) {
-        console.error('Error decoding JWT token:', decodeError);
+      // Decode the JWT token using our simple function
+      const decoded = decodeJwtToken(res.access_token);
+      if (!decoded) {
+        console.error('Error decoding JWT token');
         alert('Authentication failed. Invalid token format.');
         navigate('/login');
         return;
@@ -227,27 +231,15 @@ export const Callback: React.FC = () => {
       sessionStorage.removeItem(CODE_VERIFIER_KEY);
       sessionStorage.removeItem(STATE_KEY);
 
-      // Store user info in localStorage
-      const userInfo = {
-        sub: decoded.sub || '',
-        mail: decoded.mail || '',
-        email: decoded.mail || '', // Alias for mail
-        givenname: decoded.givenname || '',
-        sn: decoded.sn || '',
-        name: `${decoded.givenname || ''} ${decoded.sn || ''}`.trim(),
-        sgjob: decoded.sgjob || '',
-        c: decoded.c || '',
-        sgservicename: decoded.sgservicename || '',
-        sgigg: decoded.sgigg || '',
-      };
-      localStorage.setItem('user_info', JSON.stringify(userInfo));
+      // Store user info in localStorage - simplified to use all properties from decoded token
+      localStorage.setItem('user_info', JSON.stringify(decoded));
 
-      // Dispatch user info to Redux store
+      // Dispatch user info to Redux store - simplified to use generic properties
       dispatch(
         setAuthenticationUser({
-          userName: `${decoded.givenname} ${decoded.sn}`,
+          userName: decoded.name || decoded.preferred_username || decoded.sub || 'User',
           isAuthenticated: true,
-          mail: decoded.mail,
+          mail: decoded.mail || decoded.email || '',
           token: res.access_token,
         })
       );
