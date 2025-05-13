@@ -2,22 +2,48 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, Lock, ArrowRight } from 'lucide-react';
 import { auth } from './env';
+import { pkceChallenge } from '../utils/pkce';
+
+// Constants for sessionStorage keys
+const CODE_VERIFIER_KEY = 'sg-connect-code-verifier';
+const STATE_KEY = 'sg-connect-state';
 
 export function Login() {
     const [isLoaded, setIsLoaded] = useState(false);
 
-    const handleLogin = (): void => {
+    const handleLogin = async (): Promise<void> => {
         try {
+            // Generate PKCE challenge
+            const cr = await pkceChallenge();
+
+            // Generate random state for CSRF protection
+            const state = Array.from(window.crypto.getRandomValues(new Uint8Array(16)))
+                .map(b => b.toString(16).padStart(2, '0'))
+                .join('');
+
+            // Store code_verifier and state in sessionStorage
+            sessionStorage.setItem(CODE_VERIFIER_KEY, cr.code_verifier);
+            sessionStorage.setItem(STATE_KEY, state);
+
+            console.log('PKCE challenge generated. Code verifier stored in session storage.');
+
+            // Create authorization parameters with PKCE
             const params = new URLSearchParams({
                 client_id: auth.ENV_CLIENT_ID,
                 redirect_uri: auth.ENV_REDIRECT_URI,
                 response_type: 'code',
                 scope: auth.ENV_SCOPE,
+                state: state,
+                code_challenge: cr.code_challenge,
+                code_challenge_method: 'S256'
             });
 
+            // Redirect to authorization endpoint
+            console.log('Redirecting to authorization endpoint with PKCE parameters');
             window.location.href = `${auth.ENV_AUTHORIZATION_ENDPOINT}?${params}`;
         } catch (err) {
-            console.error(err);
+            console.error('Error during login initialization:', err);
+            alert('Failed to initialize login process. Please try again.');
         }
     };
 

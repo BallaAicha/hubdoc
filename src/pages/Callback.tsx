@@ -5,6 +5,10 @@ import { setAuthenticationUser } from '../store/authSlice';
 import { jwtDecode } from 'jwt-decode';
 import { auth } from './env';
 
+// Constants for sessionStorage keys
+const CODE_VERIFIER_KEY = 'sg-connect-code-verifier';
+const STATE_KEY = 'sg-connect-state';
+
 export const Callback: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -18,21 +22,80 @@ export const Callback: React.FC = () => {
   async function getAccessToken(): Promise<void> {
     const urlParams = new URLSearchParams(window.location.search);
     const code: string | null = urlParams.get('code');
+    const sessionState: string | null = urlParams.get('session_state');
+    const state: string | null = urlParams.get('state');
+
+    // Retrieve code_verifier from sessionStorage
+    const codeVerifier = sessionStorage.getItem(CODE_VERIFIER_KEY);
+    const storedState = sessionStorage.getItem(STATE_KEY);
+
+    if (!code) {
+      console.error('No authorization code found in URL');
+      navigate('/login');
+      return;
+    }
+
+    // Verify state to prevent CSRF attacks
+    if (state && storedState && state !== storedState) {
+      console.error('State mismatch - possible CSRF attack');
+      alert('Security error: Authentication state mismatch. Please try again.');
+      navigate('/login');
+      return;
+    }
+
+    if (!codeVerifier) {
+      console.error('No code_verifier found in sessionStorage');
+      alert('Authentication error: Missing security code. Please try again.');
+      navigate('/login');
+      return;
+    }
+
+    console.log('Authorization code received:', code);
+    if (sessionState) {
+      console.log('Session state received:', sessionState);
+    }
 
     try {
+      // Log the request details for debugging
+      console.log('Sending token request to:', auth.ENV_TOKENEND_POINT);
+      console.log('With redirect_uri:', auth.ENV_REDIRECT_URI);
+
+      const tokenParams = new URLSearchParams({
+        redirect_uri: auth.ENV_REDIRECT_URI,
+        grant_type: 'authorization_code',
+        code: code,
+        code_verifier: codeVerifier
+      });
+
+      // Add session_state if present
+      if (sessionState) {
+        tokenParams.append('session_state', sessionState);
+      }
+
       const response: Response = await fetch(auth.ENV_TOKENEND_POINT, {
         method: 'POST',
-        body: new URLSearchParams({
-          redirect_uri: auth.ENV_REDIRECT_URI,
-          grant_type: 'authorization_code',
-          code: code as string,
-        }),
+        body: tokenParams,
         headers: new Headers({
           'Content-Type': 'application/x-www-form-urlencoded',
           'Authorization': authorizationHeader,
         }),
         redirect: 'follow',
       });
+
+      if (!response.ok) {
+        let errorText = '';
+        try {
+          errorText = await response.text();
+          console.error(`Token endpoint returned error: ${response.status} ${response.statusText}`, errorText);
+        } catch {
+          console.error(`Token endpoint returned error: ${response.status} ${response.statusText}`, 'Could not read error response');
+        }
+
+        // Display error message to user
+        alert(`Authentication failed. Please try again. (Error: ${response.status})`);
+        navigate('/login');
+        return;
+      }
 
       interface TokenResponse {
         access_token: string;
@@ -53,14 +116,43 @@ export const Callback: React.FC = () => {
         [key: string]: string | undefined;
       }
 
-      const res: TokenResponse = await response.json();
-      const decoded: DecodedToken = jwtDecode<DecodedToken>(res.access_token);
+      let res: TokenResponse;
+      try {
+        res = await response.json();
+        console.log('Token response received successfully');
+      } catch (jsonError) {
+        console.error('Error parsing token response as JSON:', jsonError);
+        alert('Authentication failed. Invalid response from server.');
+        navigate('/login');
+        return;
+      }
+
+      if (!res.access_token || typeof res.access_token !== 'string') {
+        console.error('Invalid or missing access token in response:', res);
+        alert('Authentication failed. Invalid token received.');
+        navigate('/login');
+        return;
+      }
+
+      let decoded: DecodedToken;
+      try {
+        decoded = jwtDecode<DecodedToken>(res.access_token);
+      } catch (decodeError) {
+        console.error('Error decoding JWT token:', decodeError);
+        alert('Authentication failed. Invalid token format.');
+        navigate('/login');
+        return;
+      }
 
       // Store token in localStorage for future use
       localStorage.setItem('access_token', res.access_token);
       if (res.refresh_token) {
         localStorage.setItem('refresh_token', res.refresh_token);
       }
+
+      // Clean up sessionStorage for security
+      sessionStorage.removeItem(CODE_VERIFIER_KEY);
+      sessionStorage.removeItem(STATE_KEY);
 
       // Store user info in localStorage
       const userInfo = {
