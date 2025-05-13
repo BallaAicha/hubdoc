@@ -1,11 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import { FileText, Lock, ArrowRight } from 'lucide-react';
+import { auth } from './env';
 
 export function Login() {
-    const { login } = useAuth();
     const [isLoaded, setIsLoaded] = useState(false);
+
+    const handleLogin = (): void => {
+        try {
+            const params = new URLSearchParams({
+                client_id: auth.ENV_CLIENT_ID,
+                redirect_uri: auth.ENV_REDIRECT_URI,
+                response_type: 'code',
+                scope: auth.ENV_SCOPE,
+            });
+
+            window.location.href = `${auth.ENV_AUTHORIZATION_ENDPOINT}?${params}`;
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     // Animation effect when component mounts
     useEffect(() => {
@@ -13,6 +27,11 @@ export function Login() {
             setIsLoaded(true);
         }, 100);
         return () => clearTimeout(timer);
+    }, []);
+
+    // Auto-trigger login when component mounts
+    useEffect((): void => {
+        handleLogin();
     }, []);
 
     // Animation variants
@@ -128,7 +147,7 @@ export function Login() {
                             </div>
 
                             <motion.button
-                                onClick={login}
+                                onClick={handleLogin}
                                 whileHover={{ scale: 1.03, boxShadow: "0 10px 15px -3px rgba(233, 4, 30, 0.2)" }}
                                 whileTap={{ scale: 0.97 }}
                                 className="w-full py-3.5 rounded-xl bg-gradient-to-r from-primary-600 to-primary-700 text-white font-semibold hover:from-primary-700 hover:to-primary-800 transition-all duration-300 shadow-lg shadow-primary-600/20 flex items-center justify-center gap-2"
