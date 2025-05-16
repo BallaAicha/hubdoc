@@ -963,3 +963,60 @@ navigate('/home');
     </changeSet>
 </databaseChangeLog>
 
+
+
+
+
+
+
+
+-------
+@Override
+@Transactional
+public User handle(CreateUserRequest input, RequestContext context) {
+    log.info("Creating user from token data");
+
+    // Extract user info from context correctly using .get() to access the values
+    String igg = context.getUser().getIgg().get().getIgg().toString();
+    String mail = input.getEmail();
+
+    // Extract name correctly from token
+    String firstName = context.getUser().getFirstName();
+    String lastName = context.getUser().getLastName();
+
+    // Get other fields from token
+    String country = context.getUser().getCountry();
+    String job = context.getUser().getJob();
+    String serviceName = context.getUser().getServiceName();
+
+    // Check if user already exists
+    userRepository.findByIgg(igg).ifPresent(existingUser -> {
+        log.info("User with IGG {} already exists", igg);
+        throw new IllegalArgumentException("User already exists");
+    });
+
+    // Verify role exists
+    roleRepository.findByName(input.getRole()).orElseThrow(() -> {
+        log.error("Role {} not found", input.getRole());
+        return new IllegalArgumentException("Role not found: " + input.getRole());
+    });
+
+    // Create new user
+    User newUser = User.builder()
+            .id(URN.randomURN().getValue())
+            .igg(igg)
+            .firstName(firstName)
+            .lastName(lastName)
+            .mail(mail)
+            .role(input.getRole())
+            .status(UserStatus.ACTIVE)
+            .country(country)
+            .job(job)
+            .serviceName(serviceName)
+            .build();
+
+    User savedUser = userRepository.save(newUser);
+    log.info("User created successfully with IGG: {}", igg);
+
+    return savedUser;
+}
