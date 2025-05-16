@@ -1,133 +1,965 @@
-{
-  "id": "a1b2c3d4-5678-4321-abcd-ef1234567890",
-  "name": "Authentication Banking Service",
-  "trigramme": "ABB",
-  "description": "Service central d'authentification pour toutes les applications bancaires avec support OAuth2, JWT et MFA",
-  "infrastructure": {
-    "urlInt": "https://int-auth.bankingsolutions.com",
-    "urlUat": "https://uat-auth.bankingsolutions.com",
-    "urlOat": "https://oat-auth.bankingsolutions.com",
-    "urlProd": "https://auth.bankingsolutions.com"
-  },
-  "dataSources": {
-    "rabbitMQ": true,
-    "commonDB": false,
-    "dedicatedDB": true,
-    "s3": false
-  },
-  "clientConsumers": [
-    "MobileBanking",
-    "WebPortal",
-    "ATMInterface",
-    "BranchSystemApp"
-  ],
-  "consumes": [
-    "DirectoryService",
-    "BiometricValidationAPI",
-    "AuditLogger"
-  ],
-  "consumedBy": [
-    "LoanProcessingSystem",
-    "AccountManagementSystem",
-    "CardIssuanceService",
-    "CustomerPortal"
-  ],
-  "endpoints": [
-    {
-      "method": "POST",
-      "path": "/api/v2/auth/login",
-      "curl": "curl -X POST https://auth.bankingsolutions.com/api/v2/auth/login -H 'Content-Type: application/json' -d '{\"username\":\"customer123\",\"password\":\"securePass\",\"deviceId\":\"MOB-IOS-12345\"}'",
-      "expectedResponse": "{\"accessToken\":\"eyJhbGciOiJS...\",\"refreshToken\":\"eyR2eXAiOi...\",\"expiresIn\":1800,\"userProfile\":{\"id\":\"U98765\",\"role\":\"CUSTOMER\",\"lastLogin\":\"2023-10-17T08:45:23Z\"}}",
-      "description": "Authentification d'un client bancaire et génération des tokens d'accès"
-    },
-    {
-      "method": "POST",
-      "path": "/api/v2/auth/mfa/verify",
-      "curl": "curl -X POST https://auth.bankingsolutions.com/api/v2/auth/mfa/verify -H 'Content-Type: application/json' -H 'Authorization: Bearer eyJhbGciOiJS...' -d '{\"mfaCode\":\"123456\",\"mfaType\":\"SMS\"}'",
-      "expectedResponse": "{\"verified\":true,\"sessionToken\":\"eyJhbGcRTY...\",\"sessionExpiry\":\"2023-10-17T10:45:23Z\"}",
-      "description": "Vérification de l'authentification à deux facteurs"
-    },
-    {
-      "method": "POST",
-      "path": "/api/v2/auth/token/refresh",
-      "curl": "curl -X POST https://auth.bankingsolutions.com/api/v2/auth/token/refresh -H 'Content-Type: application/json' -d '{\"refreshToken\":\"eyR2eXAiOi...\"}'",
-      "expectedResponse": "{\"accessToken\":\"eyJuZXdh...\",\"expiresIn\":1800}",
-      "description": "Renouvellement du token d'accès à l'aide du token de rafraîchissement"
-    }
-  ],
-  "databaseSchema": "banking_auth_schema"
+package com.socgen.unibank.branch.onboarding.core.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserDTO {
+    private Long id;
+    private String firstName;
+    private String lastName;
+    private String status;
+    private String igg;
+    private String role;
+    private String mail;
+    private String country;
+    private String job;
+    private String serviceName;
+}
+
+--------
+
+package com.socgen.unibank.branch.onboarding.core.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class RoleDTO {
+    private Long id;
+    private String name;
+    private List<PermissionDTO> permissions = new ArrayList<>();
 }
 
 
 
+--------
+package com.socgen.unibank.branch.onboarding.core.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-
-
-
-
-
-
-------------------------------
-
-{
-  "id": "b2c3d4e5-6789-5432-bcde-f62345678901",
-  "name": "Advanced Evaluation Payment Service",
-  "trigramme": "AEP",
-  "description": "Service de validation et d'analyse des paiements avec détection de fraudes et scoring transactionnel en temps réel",
-  "infrastructure": {
-    "urlInt": "https://int-payment-eval.bankingsolutions.com",
-    "urlUat": "https://uat-payment-eval.bankingsolutions.com",
-    "urlOat": "https://oat-payment-eval.bankingsolutions.com",
-    "urlProd": "https://payment-eval.bankingsolutions.com"
-  },
-  "dataSources": {
-    "rabbitMQ": true,
-    "commonDB": true,
-    "dedicatedDB": true,
-    "s3": true
-  },
-  "clientConsumers": [
-    "PaymentGateway",
-    "CardProcessingSystem",
-    "MerchantPortal",
-    "FraudAnalysisDashboard"
-  ],
-  "consumes": [
-    "TransactionHistoryService",
-    "CustomerRiskProfile",
-    "MerchantDatabase",
-    "GeoLocationService"
-  ],
-  "consumedBy": [
-    "SettlementSystem",
-    "TransactionAuditSystem",
-    "ComplianceReportingService",
-    "CustomerAlertSystem"
-  ],
-  "endpoints": [
-    {
-      "method": "POST",
-      "path": "/api/v3/payments/evaluate",
-      "curl": "curl -X POST https://payment-eval.bankingsolutions.com/api/v3/payments/evaluate -H 'Content-Type: application/json' -H 'X-API-Key: abcd1234' -d '{\"accountId\":\"ACC98765\",\"amount\":1250.75,\"currency\":\"EUR\",\"merchantId\":\"MER567\",\"deviceFingerprint\":\"DF789012\",\"transactionType\":\"ONLINE\"}'",
-      "expectedResponse": "{\"transactionId\":\"TRX123456\",\"riskScore\":15,\"approvalStatus\":\"APPROVED\",\"verificationNeeded\":false,\"processingTime\":0.153,\"limits\":{\"remaining\":8750.25,\"daily\":10000}}",
-      "description": "Évaluation d'une transaction pour déterminer le risque et approbation"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v3/payments/status/{transactionId}",
-      "curl": "curl -X GET https://payment-eval.bankingsolutions.com/api/v3/payments/status/TRX123456 -H 'X-API-Key: abcd1234'",
-      "expectedResponse": "{\"transactionId\":\"TRX123456\",\"status\":\"CLEARED\",\"processedAt\":\"2023-10-17T14:23:17Z\",\"settlementStatus\":\"PENDING\",\"riskDetails\":{\"flags\":[],\"score\":15}}",
-      "description": "Vérification du statut d'une transaction évaluée précédemment"
-    },
-    {
-      "method": "POST",
-      "path": "/api/v3/fraud/report",
-      "curl": "curl -X POST https://payment-eval.bankingsolutions.com/api/v3/fraud/report -H 'Content-Type: application/json' -H 'X-API-Key: abcd1234' -d '{\"transactionId\":\"TRX123456\",\"reportType\":\"SUSPECTED_FRAUD\",\"details\":\"Unusual location and amount\"}'",
-      "expectedResponse": "{\"reportId\":\"FR789012\",\"status\":\"RECEIVED\",\"estimatedReviewTime\":\"2h\"}",
-      "description": "Signalement d'une transaction potentiellement frauduleuse pour enquête"
-    }
-  ],
-  "databaseSchema": "payment_evaluation_schema"
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class PermissionDTO {
+    private Long id;
+    private boolean read;
+    private boolean create;
+    private boolean update;
+    private boolean delete;
 }
+
+---------
+package com.socgen.unibank.branch.onboarding.core.request;
+
+import io.leangen.graphql.annotations.GraphQLNonNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import javax.validation.constraints.NotNull;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class CreateUserRequest {
+    private @NotNull @GraphQLNonNull String email;
+    private @NotNull @GraphQLNonNull String name;
+    private @NotNull @GraphQLNonNull String role;
+}
+
+--------
+package com.socgen.unibank.branch.onboarding.core.model;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class User {
+    private Long id;
+    private String firstName;
+    private String lastName;
+    private UserStatus status;
+    private String igg;
+    private String role;
+    private String mail;
+    private String country;
+    private String job;
+    private String serviceName;
+}
+
+
+----------
+package com.socgen.unibank.branch.onboarding.core.model;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+public enum UserStatus {
+    ACTIVE("ACTIVE"),
+    INACTIVE("INACTIVE"),
+    PENDING("PENDING");
+
+    private final String value;
+}
+
+--------
+package com.socgen.unibank.branch.onboarding.core.model;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Role {
+    private Long id;
+    private String name;
+    private List<Permission> permissions = new ArrayList<>();
+}
+
+--------
+
+package com.socgen.unibank.branch.onboarding.core.model;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Permission {
+    private Long id;
+    private boolean read;
+    private boolean create;
+    private boolean update;
+    private boolean delete;
+}
+
+--------
+package com.socgen.unibank.branch.onboarding.gateways.outbound.jpa.entity;
+
+import com.socgen.unibank.branch.onboarding.core.model.User;
+import com.socgen.unibank.branch.onboarding.core.model.UserStatus;
+import com.socgen.unibank.common.id.URN;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
+
+@Entity
+@Table(name = "users")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserEntity {
+
+    @EmbeddedId
+    @AttributeOverride(name = "value", column = @Column(name = "id"))
+    private URN id;
+
+    @Column(name = "igg", unique = true)
+    private String igg;
+
+    @Column(name = "role")
+    private String role;
+
+    @Column(name = "mail", unique = true)
+    private String mail;
+
+    @Column(name = "first_name")
+    private String firstName;
+
+    @Column(name = "last_name")
+    private String lastName;
+
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
+
+    @Column(name = "country")
+    private String country;
+
+    @Column(name = "job")
+    private String job;
+
+    @Column(name = "service_name")
+    private String serviceName;
+
+    public static UserEntity fromDomain(User user) {
+        return UserEntity.builder()
+                .id(new URN(user.getId()))
+                .igg(user.getIgg())
+                .role(user.getRole())
+                .mail(user.getMail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .status(user.getStatus())
+                .country(user.getCountry())
+                .job(user.getJob())
+                .serviceName(user.getServiceName())
+                .build();
+    }
+
+    public User toDomain() {
+        return User.builder()
+                .id(id.getValue())
+                .igg(igg)
+                .role(role)
+                .mail(mail)
+                .firstName(firstName)
+                .lastName(lastName)
+                .status(status)
+                .country(country)
+                .job(job)
+                .serviceName(serviceName)
+                .build();
+    }
+}
+
+
+--------
+
+package com.socgen.unibank.branch.onboarding.gateways.outbound.jpa.entity;
+
+import com.socgen.unibank.branch.onboarding.core.model.Role;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Entity
+@Table(name = "roles")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class RoleEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "name", unique = true)
+    private String name;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id")
+    private List<PermissionEntity> permissions = new ArrayList<>();
+
+    public static RoleEntity fromDomain(Role role) {
+        return RoleEntity.builder()
+                .id(role.getId())
+                .name(role.getName())
+                .permissions(role.getPermissions().stream()
+                        .map(PermissionEntity::fromDomain)
+                        .collect(Collectors.toList()))
+                .build();
+    }
+
+    public Role toDomain() {
+        return Role.builder()
+                .id(id)
+                .name(name)
+                .permissions(permissions.stream()
+                        .map(PermissionEntity::toDomain)
+                        .collect(Collectors.toList()))
+                .build();
+    }
+}
+
+--------
+package com.socgen.unibank.branch.onboarding.gateways.outbound.jpa.entity;
+
+import com.socgen.unibank.branch.onboarding.core.model.Permission;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
+
+@Entity
+@Table(name = "permissions")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class PermissionEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "read_permission")
+    private boolean read;
+
+    @Column(name = "create_permission")
+    private boolean create;
+
+    @Column(name = "update_permission")
+    private boolean update;
+
+    @Column(name = "delete_permission")
+    private boolean delete;
+
+    public static PermissionEntity fromDomain(Permission permission) {
+        return PermissionEntity.builder()
+                .id(permission.getId())
+                .read(permission.isRead())
+                .create(permission.isCreate())
+                .update(permission.isUpdate())
+                .delete(permission.isDelete())
+                .build();
+    }
+
+    public Permission toDomain() {
+        return Permission.builder()
+                .id(id)
+                .read(read)
+                .create(create)
+                .update(update)
+                .delete(delete)
+                .build();
+    }
+}
+
+--------
+
+package com.socgen.unibank.branch.onboarding.gateways.outbound.jpa.repository;
+
+import com.socgen.unibank.branch.onboarding.gateways.outbound.jpa.entity.UserEntity;
+import com.socgen.unibank.common.id.URN;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface UserJpaRepository extends JpaRepository<UserEntity, URN> {
+
+    Optional<UserEntity> findByIgg(String igg);
+
+    Optional<UserEntity> findByMail(String mail);
+
+    List<UserEntity> findAllByOrderByLastNameAscFirstNameAsc();
+
+    Page<UserEntity> findAll(Specification<UserEntity> spec, Pageable pageable);
+}
+
+
+---------
+
+package com.socgen.unibank.branch.onboarding.gateways.outbound.jpa.repository;
+
+import com.socgen.unibank.branch.onboarding.gateways.outbound.jpa.entity.RoleEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface RoleJpaRepository extends JpaRepository<RoleEntity, Long> {
+
+    Optional<RoleEntity> findByName(String name);
+}
+
+
+--------
+
+
+
+package com.socgen.unibank.branch.onboarding.core.repository;
+
+import com.socgen.unibank.branch.onboarding.core.model.User;
+import com.socgen.unibank.common.id.URN;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface UserRepository {
+
+    User save(User user);
+
+    Optional<User> findById(URN id);
+
+    Optional<User> findByIgg(String igg);
+
+    Optional<User> findByMail(String mail);
+
+    List<User> findAllOrderedByName();
+
+    void deleteById(URN id);
+}
+
+
+----------
+package com.socgen.unibank.branch.onboarding.core.repository;
+
+import com.socgen.unibank.branch.onboarding.core.model.Role;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface RoleRepository {
+
+    Role save(Role role);
+
+    Optional<Role> findById(Long id);
+
+    Optional<Role> findByName(String name);
+
+    List<Role> findAll();
+
+    void deleteById(Long id);
+}
+
+
+
+----------
+
+
+package com.socgen.unibank.branch.onboarding.gateways.outbound.repository;
+
+import com.socgen.unibank.branch.onboarding.core.model.User;
+import com.socgen.unibank.branch.onboarding.core.repository.UserRepository;
+import com.socgen.unibank.branch.onboarding.gateways.outbound.jpa.entity.UserEntity;
+import com.socgen.unibank.branch.onboarding.gateways.outbound.jpa.repository.UserJpaRepository;
+import com.socgen.unibank.common.id.URN;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Component
+@RequiredArgsConstructor
+public class UserRepositoryImpl implements UserRepository {
+
+    private final UserJpaRepository userJpaRepository;
+
+    @Override
+    public User save(User user) {
+        UserEntity entity = UserEntity.fromDomain(user);
+        return userJpaRepository.save(entity).toDomain();
+    }
+
+    @Override
+    public Optional<User> findById(URN id) {
+        return userJpaRepository.findById(id).map(UserEntity::toDomain);
+    }
+
+    @Override
+    public Optional<User> findByIgg(String igg) {
+        return userJpaRepository.findByIgg(igg).map(UserEntity::toDomain);
+    }
+
+    @Override
+    public Optional<User> findByMail(String mail) {
+        return userJpaRepository.findByMail(mail).map(UserEntity::toDomain);
+    }
+
+    @Override
+    public List<User> findAllOrderedByName() {
+        return userJpaRepository.findAllByOrderByLastNameAscFirstNameAsc()
+                .stream()
+                .map(UserEntity::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteById(URN id) {
+        userJpaRepository.deleteById(id);
+    }
+}
+
+
+
+----------
+package com.socgen.unibank.branch.onboarding.gateways.outbound.repository;
+
+import com.socgen.unibank.branch.onboarding.core.model.Role;
+import com.socgen.unibank.branch.onboarding.core.repository.RoleRepository;
+import com.socgen.unibank.branch.onboarding.gateways.outbound.jpa.entity.RoleEntity;
+import com.socgen.unibank.branch.onboarding.gateways.outbound.jpa.repository.RoleJpaRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Component
+@RequiredArgsConstructor
+public class RoleRepositoryImpl implements RoleRepository {
+
+    private final RoleJpaRepository roleJpaRepository;
+
+    @Override
+    public Role save(Role role) {
+        RoleEntity entity = RoleEntity.fromDomain(role);
+        return roleJpaRepository.save(entity).toDomain();
+    }
+
+    @Override
+    public Optional<Role> findById(Long id) {
+        return roleJpaRepository.findById(id).map(RoleEntity::toDomain);
+    }
+
+    @Override
+    public Optional<Role> findByName(String name) {
+        return roleJpaRepository.findByName(name).map(RoleEntity::toDomain);
+    }
+
+    @Override
+    public List<Role> findAll() {
+        return roleJpaRepository.findAll()
+                .stream()
+                .map(RoleEntity::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        roleJpaRepository.deleteById(id);
+    }
+}
+
+
+----------
+package com.socgen.unibank.branch.onboarding.core.usecase;
+
+import com.socgen.unibank.branch.onboarding.core.model.User;
+import com.socgen.unibank.branch.onboarding.core.request.CreateUserRequest;
+import com.socgen.unibank.common.usecase.Command;
+import com.socgen.unibank.common.web.RequestContext;
+
+public interface CreateUser extends Command {
+
+    User handle(CreateUserRequest input, RequestContext context);
+}
+
+
+----------
+
+package com.socgen.unibank.branch.onboarding.core.usecase;
+
+import com.socgen.unibank.branch.onboarding.core.model.User;
+import com.socgen.unibank.branch.onboarding.core.model.UserStatus;
+import com.socgen.unibank.branch.onboarding.core.repository.RoleRepository;
+import com.socgen.unibank.branch.onboarding.core.repository.UserRepository;
+import com.socgen.unibank.branch.onboarding.core.request.CreateUserRequest;
+import com.socgen.unibank.common.id.URN;
+import com.socgen.unibank.common.web.RequestContext;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class CreateUserImpl implements CreateUser {
+
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+
+    @Override
+    @Transactional
+    public User handle(CreateUserRequest input, RequestContext context) {
+        log.info("Creating user from token data");
+
+        // Extract user info from context
+        String igg = context.getUser().getIgg();
+        String mail = input.getEmail();
+        String[] nameParts = input.getName().split(" ", 2);
+        String firstName = nameParts.length > 0 ? nameParts[0] : "";
+        String lastName = nameParts.length > 1 ? nameParts[1] : "";
+        String country = context.getUser().getCountry();
+        String job = context.getUser().getJob();
+        String serviceName = context.getUser().getServiceName();
+
+        // Check if user already exists
+        userRepository.findByIgg(igg).ifPresent(existingUser -> {
+            log.info("User with IGG {} already exists", igg);
+            throw new IllegalArgumentException("User already exists");
+        });
+
+        // Verify role exists
+        roleRepository.findByName(input.getRole()).orElseThrow(() -> {
+            log.error("Role {} not found", input.getRole());
+            return new IllegalArgumentException("Role not found: " + input.getRole());
+        });
+
+        // Create new user
+        User newUser = User.builder()
+                .id(URN.randomURN().getValue())
+                .igg(igg)
+                .firstName(firstName)
+                .lastName(lastName)
+                .mail(mail)
+                .role(input.getRole())
+                .status(UserStatus.ACTIVE)
+                .country(country)
+                .job(job)
+                .serviceName(serviceName)
+                .build();
+
+        User savedUser = userRepository.save(newUser);
+        log.info("User created successfully with IGG: {}", igg);
+
+        return savedUser;
+    }
+}
+----------
+package com.socgen.unibank.branch.onboarding.core.usecase;
+
+import com.socgen.unibank.branch.onboarding.core.model.User;
+import com.socgen.unibank.common.usecase.Query;
+import com.socgen.unibank.common.web.RequestContext;
+
+import java.util.Optional;
+
+public interface GetUserByIgg extends Query {
+
+    Optional<User> handle(String igg, RequestContext context);
+}
+
+----------
+package com.socgen.unibank.branch.onboarding.core.usecase;
+
+import com.socgen.unibank.branch.onboarding.core.model.User;
+import com.socgen.unibank.branch.onboarding.core.repository.UserRepository;
+import com.socgen.unibank.common.web.RequestContext;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class GetUserByIggImpl implements GetUserByIgg {
+
+    private final UserRepository userRepository;
+
+    @Override
+    public Optional<User> handle(String igg, RequestContext context) {
+        log.info("Finding user by IGG: {}", igg);
+        return userRepository.findByIgg(igg);
+    }
+}
+
+
+----------
+
+package com.socgen.unibank.branch.onboarding.core.usecase;
+
+import com.socgen.unibank.branch.onboarding.core.model.User;
+import com.socgen.unibank.common.usecase.Query;
+import com.socgen.unibank.common.web.RequestContext;
+
+import java.util.Optional;
+
+public interface GetCurrentUser extends Query {
+
+    Optional<User> handle(RequestContext context);
+}
+
+
+
+----------
+
+
+package com.socgen.unibank.branch.onboarding.core.usecase;
+
+import com.socgen.unibank.branch.onboarding.core.model.User;
+import com.socgen.unibank.branch.onboarding.core.repository.UserRepository;
+import com.socgen.unibank.common.web.RequestContext;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class GetCurrentUserImpl implements GetCurrentUser {
+
+    private final UserRepository userRepository;
+
+    @Override
+    public Optional<User> handle(RequestContext context) {
+        String igg = context.getUser().getIgg();
+        log.info("Getting current user with IGG: {}", igg);
+        return userRepository.findByIgg(igg);
+    }
+}
+
+
+
+------
+package com.socgen.unibank.branch.onboarding.gateways.inbound.web.api;
+
+import com.socgen.unibank.branch.onboarding.core.model.User;
+import com.socgen.unibank.branch.onboarding.core.request.CreateUserRequest;
+import com.socgen.unibank.branch.onboarding.core.usecase.CreateUser;
+import com.socgen.unibank.common.web.RequestContext;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+
+public interface UserAPI extends CreateUser {
+
+    @PostMapping("/users")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Override
+    User handle(@Valid @RequestBody CreateUserRequest input, RequestContext context);
+}
+
+
+
+--------
+
+package com.socgen.unibank.branch.onboarding.gateways.inbound.web.api;
+
+import com.socgen.unibank.branch.onboarding.core.model.User;
+import com.socgen.unibank.branch.onboarding.core.request.CreateUserRequest;
+import com.socgen.unibank.branch.onboarding.core.usecase.CreateUser;
+import com.socgen.unibank.common.web.RequestContext;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+
+public interface UserAPI extends CreateUser {
+
+    @PostMapping("/users")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Override
+    User handle(@Valid @RequestBody CreateUserRequest input, RequestContext context);
+}
+
+
+--------
+// Add this function to your Callback.tsx component
+async function createUserInBackend(token: string, userInfo: any): Promise<void> {
+  try {
+    const apiUrl = `${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/users`;
+
+    const createUserRequest = {
+      email: userInfo.mail || userInfo.email || '',
+      name: userInfo.name,
+      role: 'USER' // Default role, can be changed later by admin
+    };
+
+    console.log('Creating user in backend:', createUserRequest);
+
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(createUserRequest)
+    });
+
+    if (response.ok) {
+      console.log('User created successfully in backend');
+    } else {
+      // If user already exists, this is ok
+      const errorData = await response.json();
+      console.log('Backend response:', response.status, errorData);
+
+      if (response.status === 400 && errorData.message?.includes('User already exists')) {
+        console.log('User already exists in the system, continuing...');
+      } else {
+        console.warn('Failed to create user in backend, but continuing:', errorData);
+      }
+    }
+  } catch (error) {
+    console.error('Error creating user in backend:', error);
+    // Continue anyway since this shouldn't block the login flow
+  }
+}
+
+
+
+---------
+
+// Inside your getAccessToken function, after the user info has been extracted and stored
+// Add this call after the token has been stored in localStorage and before navigating to /home
+
+// Create or update user in backend
+await createUserInBackend(tokenToUse, userInfo);
+
+// Then navigate to home
+navigate('/home');
+
+
+
+--------
+
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+
+    <changeSet id="01-create-users-table" author="socgen">
+        <createTable tableName="users">
+            <column name="id" type="varchar(255)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="igg" type="varchar(50)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="role" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mail" type="varchar(255)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="first_name" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="country" type="varchar(50)"/>
+            <column name="job" type="varchar(100)"/>
+            <column name="service_name" type="varchar(255)"/>
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="02-create-roles-table" author="socgen">
+        <createTable tableName="roles">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(50)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="03-create-permissions-table" author="socgen">
+        <createTable tableName="permissions">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="role_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_permission_role" references="roles(id)"/>
+            </column>
+            <column name="read_permission" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="create_permission" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="update_permission" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="delete_permission" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="04-insert-default-roles" author="socgen">
+        <insert tableName="roles">
+            <column name="name" value="ADMIN"/>
+        </insert>
+        <insert tableName="roles">
+            <column name="name" value="USER"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="05-insert-default-permissions" author="socgen">
+        <!-- Admin permissions -->
+        <insert tableName="permissions">
+            <column name="role_id" valueComputed="(SELECT id FROM roles WHERE name = 'ADMIN')"/>
+            <column name="read_permission" valueBoolean="true"/>
+            <column name="create_permission" valueBoolean="true"/>
+            <column name="update_permission" valueBoolean="true"/>
+            <column name="delete_permission" valueBoolean="true"/>
+        </insert>
+
+        <!-- User permissions -->
+        <insert tableName="permissions">
+            <column name="role_id" valueComputed="(SELECT id FROM roles WHERE name = 'USER')"/>
+            <column name="read_permission" valueBoolean="true"/>
+            <column name="create_permission" valueBoolean="false"/>
+            <column name="update_permission" valueBoolean="false"/>
+            <column name="delete_permission" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
 

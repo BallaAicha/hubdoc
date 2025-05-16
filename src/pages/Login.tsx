@@ -35,7 +35,10 @@ export function Login() {
                 scope: auth.ENV_SCOPE,
                 state: state,
                 code_challenge: cr.code_challenge,
-                code_challenge_method: 'S256'
+                code_challenge_method: 'S256',
+                authIndexType: 'service',
+                authIndexValue: 'L2',
+                goto: `${window.location.origin}/callback`
             });
 
             // Redirect to authorization endpoint

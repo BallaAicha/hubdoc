@@ -4,8 +4,8 @@ import { ReactNode } from 'react';
 export const authConfig = {
   clientId: 'XXXXXX', // Remplacer par le vrai Client ID
   clientSecret: 'XXXXXx', // Remplacer par le vrai Client Secret
-  authorizeEndpoint: 'https://xxxxxxx/oauth2/authorize',
-  tokenEndpoint: 'https://xxxxx/oauth2/token',
+  authorizeEndpoint: 'https://sgconnect-hom.fr.world.socgen/sgconnect/json/authenticate',
+  tokenEndpoint: 'https://sgconnect-hom.fr.world.socgen/sgconnect/json/accessToken',
   callbackUrl: 'http://localhost:3000/callback',
   scope: 'openid offline_access',
 };

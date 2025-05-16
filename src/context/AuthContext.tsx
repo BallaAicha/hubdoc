@@ -28,13 +28,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const checkAuth = () => {
       const token = localStorage.getItem('access_token');
       const userInfo = localStorage.getItem('user_info');
-      
+
       if (token && userInfo) {
         setIsAuthenticated(true);
         setUser(JSON.parse(userInfo));
       }
     };
-    
+
     checkAuth();
   }, []);
 
@@ -43,19 +43,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       // Générer le challenge PKCE qui permet de sécuriser le flux d'autorisation
       const cr = await pkceChallenge();
-      
+
       // Générer un état aléatoire pour la sécurité pour éviter les attaques CSRF
       const state = Array.from(window.crypto.getRandomValues(new Uint8Array(16)))
         .map(b => b.toString(16).padStart(2, '0'))
         .join('');
-      
+
       // Stocker le code_verifier et l'état dans le sessionStorage, cee code_verifier
       sessionStorage.setItem(CODE_VERIFIER_KEY, cr.code_verifier);
       sessionStorage.setItem(STATE_KEY, state);
-      
+
       // Construire l'URL d'autorisation
       const authUrl = new URL(authConfig.authorizeEndpoint);
-      
+
       // Ajouter les paramètres à l'URL
       authUrl.searchParams.append('client_id', authConfig.clientId);
       authUrl.searchParams.append('redirect_uri', authConfig.callbackUrl);
@@ -64,7 +64,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       authUrl.searchParams.append('state', state);
       authUrl.searchParams.append('code_challenge', cr.code_challenge);
       authUrl.searchParams.append('code_challenge_method', 'S256');
-      
+      authUrl.searchParams.append('authIndexType', 'service');
+      authUrl.searchParams.append('authIndexValue', 'L2');
+      authUrl.searchParams.append('goto', `${window.location.origin}/callback`);
+
       // Rediriger vers la page d'autorisation
       window.location.href = authUrl.toString();
     } catch (error) {
@@ -78,11 +81,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('user_info');
-    
+
     // Mettre à jour l'état
     setIsAuthenticated(false);
     setUser(null);
-    
+
     // Rediriger vers la page de connexion
     navigate('/login');
   };
