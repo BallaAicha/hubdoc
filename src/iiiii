@@ -1,0 +1,368 @@
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class CreateUserImpl implements CreateUser {
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+
+    @Override
+    public UserDTO handle(CreateUserRequest input, RequestContext context) {
+        log.info("Creating user from token data");
+
+        // Extract user info from context correctly using .get() to access the values
+        String igg = context.getUser().get().getIgg().toString();
+        String mail = context.getUser().get().getEmail().toString();
+        String firstName = context.getUser().get().getFirstName().toString();
+        String lastName = context.getUser().get().getLastName().toString();
+        String country = context.getUser().get().getCountry().toString();
+        String job = context.getUser().get().getJob().toString();
+        String serviceName = context.getUser().get().getServiceName().toString();
+
+        // Check if user already exists
+        userRepository.findByIgg(igg).ifPresent(existingUser -> {
+            log.info("User with IGG {} already exists", igg);
+            throw new IllegalArgumentException("User already exists");
+        });
+
+        // Validate role exists
+        roleRepository.findByName(input.getRole()).orElseThrow(() -> {
+            log.error("Role {} not found", input.getRole());
+            return new IllegalArgumentException("Role not found: " + input.getRole());
+        });
+
+        // Create new user directly using DTO
+        UserDTO newUser = UserDTO.builder()
+            .igg(igg)
+            .firstName(firstName)
+            .lastName(lastName)
+            .mail(mail)
+            .role(input.getRole())
+            .status("TERMINATED") // Using String instead of enum
+            .country(country)
+            .job(job)
+            .serviceName(serviceName)
+            .build();
+
+        UserDTO savedUser = userRepository.save(newUser);
+        log.info("User created successfully with IGG: {}", igg);
+
+        return savedUser;
+    }
+}
+
+
+
+
+------------
+
+package com.socgen.unibank.services.autotest.gateways.outbound.persistence.jpa;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import com.socgen.unibank.services.autotest.model.model.UserDTO;
+
+@Entity
+@Table(name = "USERS")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String firstName;
+
+    @Column(nullable = false)
+    private String lastName;
+
+    @Column(nullable = false)
+    private String status;
+
+    @Column(nullable = false, unique = true)
+    private String igg;
+
+    @Column(nullable = false)
+    private String role;
+
+    @Column(nullable = false, unique = true)
+    private String mail;
+
+    @Column
+    private String country;
+
+    @Column
+    private String job;
+
+    @Column
+    private String serviceName;
+
+    public static UserEntity fromDomain(UserDTO userDTO) {
+        return UserEntity.builder()
+                .id(userDTO.getId())
+                .firstName(userDTO.getFirstName())
+                .lastName(userDTO.getLastName())
+                .status(userDTO.getStatus())
+                .igg(userDTO.getIgg())
+                .role(userDTO.getRole())
+                .mail(userDTO.getMail())
+                .country(userDTO.getCountry())
+                .job(userDTO.getJob())
+                .serviceName(userDTO.getServiceName())
+                .build();
+    }
+
+    public UserDTO toDomain() {
+        return UserDTO.builder()
+                .id(this.id)
+                .firstName(this.firstName)
+                .lastName(this.lastName)
+                .status(this.status)
+                .igg(this.igg)
+                .role(this.role)
+                .mail(this.mail)
+                .country(this.country)
+                .job(this.job)
+                .serviceName(this.serviceName)
+                .build();
+    }
+}
+
+
+------------
+package com.socgen.unibank.services.autotest.gateways.outbound.persistence.jpa;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import com.socgen.unibank.services.autotest.model.model.RoleDTO;
+import com.socgen.unibank.services.autotest.model.model.PermissionDTO;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Entity
+@Table(name = "ROLES")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Role {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String name;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "role_id")
+    private List<Permission> permissions = new ArrayList<>();
+
+    public static Role fromDomain(RoleDTO roleDTO) {
+        Role role = Role.builder()
+                .id(roleDTO.getId())
+                .name(roleDTO.getName())
+                .build();
+
+        if (roleDTO.getPermissions() != null) {
+            role.setPermissions(roleDTO.getPermissions().stream()
+                    .map(Permission::fromDomain)
+                    .collect(Collectors.toList()));
+        }
+
+        return role;
+    }
+
+    public RoleDTO toDomain() {
+        RoleDTO roleDTO = RoleDTO.builder()
+                .id(this.id)
+                .name(this.name)
+                .build();
+
+        if (this.permissions != null) {
+            roleDTO.setPermissions(this.permissions.stream()
+                    .map(Permission::toDomain)
+                    .collect(Collectors.toList()));
+        }
+
+        return roleDTO;
+    }
+}
+
+------------
+package com.socgen.unibank.services.autotest.gateways.outbound.persistence.jpa;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import com.socgen.unibank.services.autotest.model.model.PermissionDTO;
+
+@Entity
+@Table(name = "PERMISSIONS")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Permission {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private boolean read;
+    private boolean create;
+    private boolean update;
+    private boolean delete;
+
+    public static Permission fromDomain(PermissionDTO permissionDTO) {
+        return Permission.builder()
+                .id(permissionDTO.getId())
+                .read(permissionDTO.isRead())
+                .create(permissionDTO.isCreate())
+                .update(permissionDTO.isUpdate())
+                .delete(permissionDTO.isDelete())
+                .build();
+    }
+
+    public PermissionDTO toDomain() {
+        return PermissionDTO.builder()
+                .id(this.id)
+                .read(this.read)
+                .create(this.create)
+                .update(this.update)
+                .delete(this.delete)
+                .build();
+    }
+}
+
+
+
+
+---------------
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+
+    <changeSet id="create-users-roles-permissions-tables" author="developer">
+        <!-- Create PERMISSIONS table -->
+        <createTable tableName="PERMISSIONS">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="read" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="create" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="update" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="delete" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <!-- Create ROLES table -->
+        <createTable tableName="ROLES">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+
+        <!-- Create USERS table -->
+        <createTable tableName="USERS">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="igg" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="role" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mail" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="country" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="job" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="service_name" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <!-- Add foreign key constraint -->
+        <addForeignKeyConstraint baseTableName="PERMISSIONS" baseColumnNames="role_id"
+                                 constraintName="fk_permission_role"
+                                 referencedTableName="ROLES" referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+
+        <!-- Create indexes for better performance -->
+        <createIndex indexName="idx_user_igg" tableName="USERS">
+            <column name="igg"/>
+        </createIndex>
+        <createIndex indexName="idx_user_mail" tableName="USERS">
+            <column name="mail"/>
+        </createIndex>
+        <createIndex indexName="idx_role_name" tableName="ROLES">
+            <column name="name"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Initial roles setup -->
+    <changeSet id="initial-roles-setup" author="developer">
+        <insert tableName="ROLES">
+            <column name="name">ADMIN</column>
+        </insert>
+        <insert tableName="ROLES">
+            <column name="name">USER</column>
+        </insert>
+
+        <!-- Admin permissions -->
+        <insert tableName="PERMISSIONS">
+            <column name="role_id" valueComputed="(SELECT id FROM ROLES WHERE name = 'ADMIN')"/>
+            <column name="read" valueBoolean="true"/>
+            <column name="create" valueBoolean="true"/>
+            <column name="update" valueBoolean="true"/>
+            <column name permissions -->
+        <insert tableName="PERMISSIONS">
+            <column name="role_id" valueComputed="(SELECT id FROM ROLES WHERE name = 'USER')"/>
+            <column name="read" valueBoolean="true"/>
+            <column name="create" valueBoolean="false"/>
+            <column name="update" valueBoolean="false"/>
+            <column name="delete" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
