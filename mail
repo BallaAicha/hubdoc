@@ -1,0 +1,24 @@
+
+Objet : Point d’avancement – Modularisation du socle de développement Platform
+Bonjour à toutes et à tous,
+Dans le cadre du chantier de modularisation du socle Platform, notre objectif reste clair : rendre les capacités techniques plus flexibles, légères et adaptées aux besoins réels des services consommateurs.
+
+Actions réalisées 
+* Allègement du module unibank-platform-springboot → Externalisation de plusieurs fonctionnalités dans des modules indépendants, permettant à chaque service d’embarquer uniquement ce dont il a besoin.
+* Individualisation des tables de paramétrage → Chaque service dispose désormais de sa propre table, supprimant les dépendances inutiles.
+Modules créés et leurs bénéfices :
+* unibank-platform-dmn : moteur de règles externalisé → au démarrage, seuls les services qui l’utilisent chargent les règles, améliorant le temps de démarrage et réduisant la taille du JAR.
+* unibank-platform-initialdata : chargement initial des données depuis S3 uniquement pour les services concernés → gain de performance et optimisation du stockage.
+* unibank-platform-graphql : intégration GraphQL simplifiée et isolée.
+* unibank-platform-permission : gestion fine des droits et permissions par service.
+* unibank-platform-persistence : couche d’accès aux données modulable.
+* unibank-platform-rest : exposition REST standardisée et réutilisable.
+* unibank-platform-s3 : intégration S3 dédiée, sans surcharge pour les services qui ne l’utilisent pas.
+* unibank-platform-setting : gestion centralisée et modulable des paramètres.
+Ces modules sont déjà testés et validés sur des services tels que contact-us, eligibilities, users, etc.
+
+Next step 🚀
+Mise en place d’un composant de gestion des dépendances : → Un plugin appliqué sur un service embarquera automatiquement toutes les dépendances nécessaires à son bon fonctionnement, simplifiant encore l’intégration et la maintenance.
+
+Merci à toutes et à tous pour votre implication dans ce chantier structurant.
+Cordialement, MBACKE OUSMANE
